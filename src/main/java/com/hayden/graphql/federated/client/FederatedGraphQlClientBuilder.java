@@ -158,7 +158,7 @@ public class FederatedGraphQlClientBuilder extends AbstractGraphQlClientBuilder<
 		@Override
 		public Publisher<FederatedGraphQlResponse> request(FederatedRequestData federatedRequestData) {
 			return this.delegate.federatedDocuments(federatedRequestData, new FederatedGraphQlRequestArgs(this))
-					.executeSubscription()
+					.execute()
 					.doOnEach(item -> logExecError(item.getClass(), item))
 					.map(c -> new FederatedGraphQlResponseItem(c.getData(), c))
 					.collectList()
@@ -167,7 +167,7 @@ public class FederatedGraphQlClientBuilder extends AbstractGraphQlClientBuilder<
 
 		public Flux<ClientGraphQlResponse> requestItem(FederatedRequestData federatedRequestData) {
 			return this.delegate.federatedDocuments(federatedRequestData, new FederatedGraphQlRequestArgs(this))
-					.executeSubscription();
+					.execute();
 		}
 
 		@Override

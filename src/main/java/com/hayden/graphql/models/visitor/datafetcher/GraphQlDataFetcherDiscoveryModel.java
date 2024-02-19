@@ -15,7 +15,7 @@ import java.util.Collection;
  */
 @Slf4j
 public record GraphQlDataFetcherDiscoveryModel(String serviceId,
-                                               GraphQlFederatedSchemaSource source,
+                                               Collection<GraphQlFederatedSchemaSource> source,
                                                Collection<DataFetcherGraphQlSource> fetcherSource) implements VisitorModel {
 
 

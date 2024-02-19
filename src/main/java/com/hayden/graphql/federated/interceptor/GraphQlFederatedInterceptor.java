@@ -2,6 +2,7 @@ package com.hayden.graphql.federated.interceptor;
 
 import com.hayden.graphql.models.federated.request.FederatedGraphQlRequest;
 import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceItemId;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.graphql.client.ClientGraphQlRequest;
 import org.springframework.graphql.client.ClientGraphQlResponse;
 import org.springframework.graphql.client.GraphQlClient;
@@ -12,7 +13,7 @@ import reactor.core.publisher.Mono;
 
 public class GraphQlFederatedInterceptor implements GraphQlClientInterceptor{
 
-    public Mono<ClientGraphQlResponse> intercept(ClientGraphQlRequest request, Chain chain) {
+    public @NotNull Mono<ClientGraphQlResponse> intercept(@NotNull ClientGraphQlRequest request, @NotNull Chain chain) {
         if (request instanceof FederatedGraphQlRequest) {
             throw new UnsupportedOperationException();
         }
@@ -20,7 +21,7 @@ public class GraphQlFederatedInterceptor implements GraphQlClientInterceptor{
         return GraphQlClientInterceptor.super.intercept(request, chain);
     }
 
-    public Flux<ClientGraphQlResponse> interceptSubscription(ClientGraphQlRequest request, SubscriptionChain chain) {
+    public @NotNull Flux<ClientGraphQlResponse> interceptSubscription(@NotNull ClientGraphQlRequest request, @NotNull SubscriptionChain chain) {
         if (chain instanceof FederatedSubscriptionChain federatedChain
                 && request instanceof FederatedGraphQlRequest federatedGraphQlRequest) {
             return Flux.fromIterable(federatedGraphQlRequest.delegators().keySet())
@@ -44,7 +45,7 @@ public class GraphQlFederatedInterceptor implements GraphQlClientInterceptor{
          * @return {@code Flux} with responses
          * @see GraphQlClient.RequestSpec#executeSubscription()
          */
-        Flux<ClientGraphQlResponse> next(ClientGraphQlRequest request);
+        @NotNull Flux<ClientGraphQlResponse> next(@NotNull ClientGraphQlRequest request);
 
         default Flux<ClientGraphQlResponse> next(FederatedGraphQlRequest request,
                                                  FederatedGraphQlServiceItemId service) {

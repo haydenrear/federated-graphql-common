@@ -11,8 +11,9 @@ public record FederatedGraphQlRequest(Map<FederatedGraphQlServiceItemId, Federat
         implements ClientGraphQlRequest {
 
     public record FederatedClientGraphQlRequestItem(
-            FederatedGraphQlServiceItemId service, @Delegate ClientGraphQlRequest clientGraphQlRequest)
-            implements ClientGraphQlRequest {}
+            FederatedGraphQlServiceItemId service,
+            @Delegate ClientGraphQlRequest clientGraphQlRequest
+    ) implements ClientGraphQlRequest {}
 
     public Optional<ClientGraphQlRequest> service(FederatedGraphQlServiceItemId service) {
         return Optional.ofNullable(delegators.get(service))

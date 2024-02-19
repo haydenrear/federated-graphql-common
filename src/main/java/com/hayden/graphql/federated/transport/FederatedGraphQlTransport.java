@@ -4,6 +4,7 @@ import com.hayden.graphql.federated.client.FederatedGraphQlClientBuilder;
 import com.hayden.graphql.models.visitor.DataTemplate;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import com.hayden.graphql.models.federated.request.ClientFederatedRequestItem;
@@ -14,6 +15,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.graphql.GraphQlRequest;
 import org.springframework.graphql.GraphQlResponse;
 import org.springframework.graphql.client.AbstractGraphQlClientBuilder;
+import org.springframework.graphql.client.ClientGraphQlRequest;
 import org.springframework.graphql.client.GraphQlTransport;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ClassUtils;
@@ -32,7 +34,10 @@ public class FederatedGraphQlTransport implements GraphQlTransport {
     protected static final boolean jackson2Present = ClassUtils.isPresent(
             "com.fasterxml.jackson.databind.ObjectMapper", AbstractGraphQlClientBuilder.class.getClassLoader());
 
+    @SuppressWarnings("rawtypes")
     private final Map<FederatedGraphQlServiceItemId, FederatedItemGraphQlTransport> transports = new ConcurrentHashMap<>();
+
+    private final FederatedItemGraphQlTransport.FetcherGraphQlTransportDelegate fetcherGraphQlTransport;
 
     private Encoder<?> jsonEncoder;
     private Decoder<?> jsonDecoder;
@@ -42,7 +47,7 @@ public class FederatedGraphQlTransport implements GraphQlTransport {
     public record GraphQlTransportRegistration(GraphQlTransport graphQlTransport,
                                                FederatedGraphQlServiceItemId serviceItemId,
                                                DataTemplate dataTemplate) implements GraphQlRegistration {}
-    public record FederatedGraphQlTransportRegistration(FederatedItemGraphQlTransport graphQlTransport,
+    public record FederatedGraphQlTransportRegistration(FederatedItemGraphQlTransport<FederatedGraphQlRequest.FederatedClientGraphQlRequestItem> graphQlTransport,
                                                         FederatedGraphQlServiceItemId serviceItemId) implements GraphQlRegistration {}
 
     @PostConstruct
@@ -54,12 +59,13 @@ public class FederatedGraphQlTransport implements GraphQlTransport {
     }
 
 
-    public Optional<FederatedItemGraphQlTransport> retrieve(GraphQlRequest request) {
+    @SuppressWarnings("unchecked")
+    public Optional<FederatedItemGraphQlTransport<ClientGraphQlRequest>> retrieve(GraphQlRequest request) {
         if (request instanceof FederatedGraphQlRequest.FederatedClientGraphQlRequestItem federated) {
             return Optional.ofNullable(transports.get(federated.service()));
+        }  else {
+            return Optional.of(fetcherGraphQlTransport);
         }
-
-        return Optional.empty();
     }
 
     public void register(GraphQlRegistration  federatedGraphQlTransport) {
@@ -79,7 +85,7 @@ public class FederatedGraphQlTransport implements GraphQlTransport {
     }
 
     @Override
-    public Flux<GraphQlResponse> executeSubscription(GraphQlRequest request) {
+    public @NotNull Flux<GraphQlResponse> executeSubscription(@NotNull GraphQlRequest request) {
         return Mono.justOrEmpty(retrieve(request))
                 .flatMapMany(e -> {
                     if (request instanceof ClientFederatedRequestItem item) {

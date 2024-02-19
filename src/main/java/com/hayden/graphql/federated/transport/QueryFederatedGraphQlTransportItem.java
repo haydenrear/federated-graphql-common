@@ -7,7 +7,7 @@ import org.springframework.graphql.client.ClientGraphQlResponse;
 /**
  * The standard query request graphQL transport.
  */
-public class QueryFederatedGraphQlTransportItem implements FederatedItemGraphQlTransport {
+public class QueryFederatedGraphQlTransportItem implements FederatedItemGraphQlTransport<ClientFederatedRequestItem> {
     @Override
     public Publisher<ClientGraphQlResponse> next(ClientFederatedRequestItem request) {
         return request.getClient().federatedGraphQlClient()

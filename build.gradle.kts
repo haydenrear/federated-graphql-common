@@ -1,5 +1,6 @@
 plugins {
     id("com.hayden.test-jar")
+    id("com.netflix.dgs.codegen") version "6.0.3"
     id("com.hayden.no-main-class")
 }
 

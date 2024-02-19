@@ -43,7 +43,7 @@ public class DefaultFederatedGraphQlClient {
         private final FederatedGraphQlClientBuilder.FederatedGraphQlClient.FederatedGraphQlRequestArgs client;
 
 
-        public Flux<ClientGraphQlResponse> executeSubscription() {
+        public Flux<ClientGraphQlResponse> execute() {
             return initRequest()
                     .flatMapMany(request -> executeSubscriptionChain.next(request)
                     .onErrorResume(

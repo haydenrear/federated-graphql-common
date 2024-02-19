@@ -7,7 +7,7 @@ import org.reactivestreams.Publisher;
 import org.springframework.graphql.client.ClientGraphQlResponse;
 
 @RequiredArgsConstructor
-public class RemoteFederatedItemGraphQlTransport implements FederatedItemGraphQlTransport {
+public class RemoteFederatedItemGraphQlTransport implements FederatedItemGraphQlTransport<ClientFederatedRequestItem> {
 
     private final RemoteDataFederation remoteDataFetcher;
 
