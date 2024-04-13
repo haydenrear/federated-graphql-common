@@ -49,19 +49,20 @@ public class FederatedGraphQlClientBuilder extends AbstractGraphQlClientBuilder<
 	@Nullable
 	private Decoder<?> jsonDecoder;
 
-
-
 	@Override
 	public GraphQlClient build() {
-		throw new NotImplementedException("Failed...");
+		throw new NotImplementedException("Use buildFederatedClient to build %s.".formatted(this.getClass().getSimpleName()));
 	}
 
 	public FederatedGraphQlClient buildFederatedClient(FederatedGraphQlTransportResult transport) {
-		if (this.clientBuilt == null || transport.doReload()) {
-			DefaultFederatedGraphQlClient graphQlClient = buildGraphQlClient(transport.transport());
-			this.clientBuilt = new FederatedGraphQlClient(graphQlClient, this);
-		}
-		return this.clientBuilt;
+		return Optional.ofNullable(this.clientBuilt)
+				// rebuild client required to add new data fetchers from DGS, as DataFetchers are how Federation is
+				// implemented.
+				.filter(buildClientExists -> !transport.doReload())
+				.orElseGet(() -> {
+					DefaultFederatedGraphQlClient graphQlClient = buildGraphQlClient(transport.transport());
+					return new FederatedGraphQlClient(graphQlClient, this);
+				});
 	}
 
 	/**
@@ -139,7 +140,7 @@ public class FederatedGraphQlClientBuilder extends AbstractGraphQlClientBuilder<
 	/**
 	 * Default {@link HttpGraphQlClient} implementation.
 	 */
-	public static class FederatedGraphQlClient implements DataServiceRequestExecutor, AutoCloseable{
+	public static class FederatedGraphQlClient implements DataServiceRequestExecutor, AutoCloseable {
 
 		@Delegate
 		private final DefaultFederatedGraphQlClient delegate;

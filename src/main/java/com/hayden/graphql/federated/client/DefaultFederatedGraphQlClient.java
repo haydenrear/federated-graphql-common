@@ -54,8 +54,11 @@ public class DefaultFederatedGraphQlClient {
         private Mono<FederatedGraphQlRequest> initRequest() {
             return Flux.fromArray(this.requestData.data())
                     .map(document -> Pair.of(document.federatedService(), new ClientFederatedRequestItem(
-                            document.requestBody(), document.operationName(),
-                            document.variables(), document.extensions(), document.attributes(),
+                            document.requestBody(),
+                            document.operationName(),
+                            document.variables(),
+                            document.extensions(),
+                            document.attributes(),
                             requestData, client
                     )))
                     .map(p -> Map.entry(p.getKey(), new FederatedGraphQlRequest.FederatedClientGraphQlRequestItem(p.getKey(), p.getRight())))

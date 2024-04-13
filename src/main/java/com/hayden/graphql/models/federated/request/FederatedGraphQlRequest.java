@@ -7,15 +7,15 @@ import org.springframework.graphql.client.ClientGraphQlRequest;
 import java.util.Map;
 import java.util.Optional;
 
-public record FederatedGraphQlRequest(Map<FederatedGraphQlServiceItemId, FederatedClientGraphQlRequestItem> delegators)
+public record FederatedGraphQlRequest(Map<FederatedGraphQlServiceItemId.FederatedGraphQlServiceId, FederatedClientGraphQlRequestItem> delegators)
         implements ClientGraphQlRequest {
 
     public record FederatedClientGraphQlRequestItem(
-            FederatedGraphQlServiceItemId service,
+            FederatedGraphQlServiceItemId.FederatedGraphQlServiceId service,
             @Delegate ClientGraphQlRequest clientGraphQlRequest
     ) implements ClientGraphQlRequest {}
 
-    public Optional<ClientGraphQlRequest> service(FederatedGraphQlServiceItemId service) {
+    public Optional<ClientGraphQlRequest> service(FederatedGraphQlServiceItemId.FederatedGraphQlServiceId service) {
         return Optional.ofNullable(delegators.get(service))
                 .map(FederatedClientGraphQlRequestItem::clientGraphQlRequest);
     }

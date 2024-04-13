@@ -19,7 +19,7 @@ public class FederatedDynamicGraphQlSource implements GraphQlSource {
     private GraphQLSchema graphQLSchema;
 
 
-//    private final DgsQueryExecutor queryExecutor;
+    private final DgsQueryExecutor queryExecutor;
 
 
     volatile boolean doReload;
@@ -31,19 +31,19 @@ public class FederatedDynamicGraphQlSource implements GraphQlSource {
 
 
     private void reload() {
-//        if (this.graphQLSchema == null) {
-//            this.graphQLSchema = ((DefaultDgsQueryExecutor) queryExecutor).getSchema().get();
-//            this.graphQl = GraphQL.newGraphQL(this.graphQLSchema).build();
-//        }
-//        if (doReload) {
-//            synchronized (this) {
-//                if (doReload) {
-//                    this.graphQLSchema = ((DefaultDgsQueryExecutor)queryExecutor).getSchema().get();
-//                    this.graphQl = GraphQL.newGraphQL(this.graphQLSchema).build();
-//                    doReload = false;
-//                }
-//            }
-//        }
+        if (this.graphQLSchema == null) {
+            this.graphQLSchema = ((DefaultDgsQueryExecutor) queryExecutor).getSchema().get();
+            this.graphQl = GraphQL.newGraphQL(this.graphQLSchema).build();
+        }
+        if (doReload) {
+            synchronized (this) {
+                if (doReload) {
+                    this.graphQLSchema = ((DefaultDgsQueryExecutor)queryExecutor).getSchema().get();
+                    this.graphQl = GraphQL.newGraphQL(this.graphQLSchema).build();
+                    doReload = false;
+                }
+            }
+        }
     }
 
     @Override

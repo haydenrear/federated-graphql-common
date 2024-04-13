@@ -48,7 +48,7 @@ public class GraphQlFederatedInterceptor implements GraphQlClientInterceptor{
         @NotNull Flux<ClientGraphQlResponse> next(@NotNull ClientGraphQlRequest request);
 
         default Flux<ClientGraphQlResponse> next(FederatedGraphQlRequest request,
-                                                 FederatedGraphQlServiceItemId service) {
+                                                 FederatedGraphQlServiceItemId.FederatedGraphQlServiceId service) {
             return Mono.justOrEmpty(request.service(service))
                     .flatMapMany(this::next);
         }

@@ -18,6 +18,10 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+/**
+ * The transport that uses the DGS context. When a new DataFetcher is compiled and registered with DGS, this
+ * will be available through this transport.
+ */
 @Component
 @RequiredArgsConstructor
 public class FetcherGraphQlTransport implements GraphQlTransport {
@@ -31,7 +35,7 @@ public class FetcherGraphQlTransport implements GraphQlTransport {
 
     @PostConstruct
     public void create() {
-//        this.graphQlClient = new DefaultExecutionGraphQlService(federatedGraphQlSource);
+        this.graphQlClient = new DefaultExecutionGraphQlService(federatedGraphQlSource);
     }
 
     @Override

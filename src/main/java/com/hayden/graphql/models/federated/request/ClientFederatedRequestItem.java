@@ -5,7 +5,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.hayden.graphql.federated.client.FederatedGraphQlClientBuilder;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.graphql.client.ClientGraphQlRequest;
 import org.springframework.graphql.support.DefaultGraphQlRequest;
@@ -17,7 +20,7 @@ import org.springframework.lang.Nullable;
  * @author Rossen Stoyanchev
  * @since 1.0.0
  */
-public final class ClientFederatedRequestItem extends DefaultGraphQlRequest implements ClientGraphQlRequest {
+public class ClientFederatedRequestItem extends DefaultGraphQlRequest implements ClientGraphQlRequest {
 
     private final Map<String, Object> attributes = new ConcurrentHashMap<>();
     @Getter
