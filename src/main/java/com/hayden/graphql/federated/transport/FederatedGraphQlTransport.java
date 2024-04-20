@@ -1,6 +1,6 @@
 package com.hayden.graphql.federated.transport;
 
-import com.hayden.graphql.federated.client.FederatedGraphQlClientBuilder;
+import com.hayden.graphql.federated.client.FederatedGraphQlClientBuilderHolder;
 import com.hayden.graphql.federated.transport.health.HealthEvent;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.tuple.Pair;
@@ -76,8 +76,8 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
     @PostConstruct
     void setEncoders() {
         if (jackson2Present) {
-            this.jsonEncoder = (this.jsonEncoder == null ? FederatedGraphQlClientBuilder.DefaultJackson2Codecs.encoder() : this.jsonEncoder);
-            this.jsonDecoder = (this.jsonDecoder == null ? FederatedGraphQlClientBuilder.DefaultJackson2Codecs.decoder() : this.jsonDecoder);
+            this.jsonEncoder = (this.jsonEncoder == null ? FederatedGraphQlClientBuilderHolder.DefaultJackson2Codecs.encoder() : this.jsonEncoder);
+            this.jsonDecoder = (this.jsonDecoder == null ? FederatedGraphQlClientBuilderHolder.DefaultJackson2Codecs.decoder() : this.jsonDecoder);
         }
     }
 

@@ -31,7 +31,7 @@ public class DefaultFederatedGraphQlClient {
     }
 
     public FederatedRequestSpec federatedDocuments(FederatedRequestData requestData,
-                                                   FederatedGraphQlClientBuilder.FederatedGraphQlClient.FederatedGraphQlRequestArgs federatedGraphQlClient) {
+                                                   FederatedGraphQlClientBuilderHolder.FederatedGraphQlClient.FederatedGraphQlRequestArgs federatedGraphQlClient) {
         return new FederatedRequestSpec(requestData, federatedGraphQlClient);
     }
 
@@ -40,7 +40,7 @@ public class DefaultFederatedGraphQlClient {
     public final class FederatedRequestSpec  {
 
         private final FederatedRequestData requestData;
-        private final FederatedGraphQlClientBuilder.FederatedGraphQlClient.FederatedGraphQlRequestArgs client;
+        private final FederatedGraphQlClientBuilderHolder.FederatedGraphQlClient.FederatedGraphQlRequestArgs client;
 
 
         public Flux<ClientGraphQlResponse> execute() {

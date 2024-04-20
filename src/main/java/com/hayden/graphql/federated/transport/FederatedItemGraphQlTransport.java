@@ -1,13 +1,11 @@
 package com.hayden.graphql.federated.transport;
 
-import com.hayden.graphql.federated.client.FederatedGraphQlClientBuilder;
+import com.hayden.graphql.federated.client.FederatedGraphQlClientBuilderHolder;
 import com.hayden.graphql.models.federated.request.ClientFederatedRequestItem;
 import com.hayden.graphql.models.federated.response.DefaultClientGraphQlResponse;
 import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceItemId;
-import com.hayden.graphql.models.visitor.DataTemplate;
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
 import org.reactivestreams.Publisher;
@@ -76,8 +74,8 @@ public interface FederatedItemGraphQlTransport<R extends GraphQlRequest> extends
 
         @PostConstruct
         public void setValues() {
-            encoder = Optional.ofNullable(encoder).orElse(FederatedGraphQlClientBuilder.DefaultJackson2Codecs.encoder());
-            decoder = Optional.ofNullable(decoder).orElse(FederatedGraphQlClientBuilder.DefaultJackson2Codecs.decoder());
+            encoder = Optional.ofNullable(encoder).orElse(FederatedGraphQlClientBuilderHolder.DefaultJackson2Codecs.encoder());
+            decoder = Optional.ofNullable(decoder).orElse(FederatedGraphQlClientBuilderHolder.DefaultJackson2Codecs.decoder());
         }
 
         @Override

@@ -7,6 +7,8 @@ import com.hayden.graphql.federated.transport.FederatedGraphQlTransport;
 import com.hayden.graphql.models.federated.request.FederatedRequestData;
 import com.hayden.graphql.models.federated.response.FederatedClientGraphQlResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.SneakyThrows;
 import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
@@ -31,8 +33,8 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
-public class FederatedGraphQlClientBuilder extends AbstractGraphQlClientBuilder<FederatedGraphQlClientBuilder>
-		implements GraphQlClient.Builder<FederatedGraphQlClientBuilder>, AutoCloseable, IFederatedGraphQlClientBuilder {
+public class FederatedGraphQlClientBuilderHolder extends AbstractGraphQlClientBuilder<FederatedGraphQlClientBuilderHolder>
+		implements GraphQlClient.Builder<FederatedGraphQlClientBuilderHolder>, AutoCloseable, IFederatedGraphQlClientBuilder {
 
 	protected static final boolean jackson2Present = ClassUtils.isPresent(
 			"com.fasterxml.jackson.databind.ObjectMapper", AbstractGraphQlClientBuilder.class.getClassLoader());
@@ -41,6 +43,13 @@ public class FederatedGraphQlClientBuilder extends AbstractGraphQlClientBuilder<
 	private final List<GraphQlClientInterceptor> interceptors = List.of(new GraphQlFederatedInterceptor());
 
 	private FederatedGraphQlClient clientBuilt;
+
+	/**
+	 * Connection pool proxy ref for close to add back to connection pool. Sort of like self-decorator - pass myself to someone
+	 * else, that someone else passes me myself decorated and now I use that ref to call.
+	 */
+	@Setter
+	private IFederatedGraphQlClientBuilder proxyRef;
 
 
 	@Nullable
@@ -61,7 +70,7 @@ public class FederatedGraphQlClientBuilder extends AbstractGraphQlClientBuilder<
 				.filter(buildClientExists -> !transport.doReload())
 				.orElseGet(() -> {
 					DefaultFederatedGraphQlClient graphQlClient = buildGraphQlClient(transport.transport());
-					return new FederatedGraphQlClient(graphQlClient, this);
+					return new FederatedGraphQlClient(graphQlClient, Optional.ofNullable(proxyRef).orElse(this));
 				});
 	}
 
@@ -123,7 +132,7 @@ public class FederatedGraphQlClientBuilder extends AbstractGraphQlClientBuilder<
 
 	@Override
 	public void close() {
-		// proxied to add back to connection pool
+		log.info("Closing...");
 	}
 
 	private Encoder<?> getEncoder() {
@@ -144,11 +153,11 @@ public class FederatedGraphQlClientBuilder extends AbstractGraphQlClientBuilder<
 
 		@Delegate
 		private final DefaultFederatedGraphQlClient delegate;
-		private final FederatedGraphQlClientBuilder parent;
+		private final IFederatedGraphQlClientBuilder parent;
 
 		FederatedGraphQlClient(
 				DefaultFederatedGraphQlClient delegate,
-				FederatedGraphQlClientBuilder parent
+				IFederatedGraphQlClientBuilder parent
 		) {
 			this.delegate = delegate;
 			this.parent = parent;
@@ -171,7 +180,8 @@ public class FederatedGraphQlClientBuilder extends AbstractGraphQlClientBuilder<
 					.execute();
 		}
 
-		@Override
+		@SneakyThrows
+        @Override
 		public void close() {
 			// proxied to add back to connection pool
 			this.parent.close();

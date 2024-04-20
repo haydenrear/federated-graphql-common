@@ -1,6 +1,6 @@
 package com.hayden.graphql.models.dataservice;
 
-import com.hayden.graphql.federated.client.FederatedGraphQlClientBuilder;
+import com.hayden.graphql.federated.client.FederatedGraphQlClientBuilderHolder;
 import com.hayden.graphql.models.federated.request.FederatedRequestData;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -14,7 +14,7 @@ import org.springframework.graphql.client.ClientGraphQlResponse;
 public interface RemoteDataFederation {
 
     Publisher<ClientGraphQlResponse> get(FederatedRequestData environment,
-                                         FederatedGraphQlClientBuilder.FederatedGraphQlClient.FederatedGraphQlRequestArgs federatedGraphQlClient);
+                                         FederatedGraphQlClientBuilderHolder.FederatedGraphQlClient.FederatedGraphQlRequestArgs federatedGraphQlClient);
 
     default void wire(AutowireCapableBeanFactory beanFactory) {
         beanFactory.autowireBean(this);

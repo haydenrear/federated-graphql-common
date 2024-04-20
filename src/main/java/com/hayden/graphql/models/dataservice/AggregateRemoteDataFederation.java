@@ -1,6 +1,6 @@
 package com.hayden.graphql.models.dataservice;
 
-import com.hayden.graphql.federated.client.FederatedGraphQlClientBuilder;
+import com.hayden.graphql.federated.client.FederatedGraphQlClientBuilderHolder;
 import com.hayden.graphql.models.federated.request.FederatedRequestData;
 import org.reactivestreams.Publisher;
 import org.springframework.graphql.client.ClientGraphQlResponse;
@@ -21,7 +21,7 @@ public interface AggregateRemoteDataFederation {
     Publisher<ClientGraphQlResponse> aggregate(Publisher<ClientGraphQlResponse> fetched);
 
     default Flux<ClientGraphQlResponse> fetch(FederatedRequestData environment,
-                                              FederatedGraphQlClientBuilder.FederatedGraphQlClient.FederatedGraphQlRequestArgs federatedGraphQlClient) {
+                                              FederatedGraphQlClientBuilderHolder.FederatedGraphQlClient.FederatedGraphQlRequestArgs federatedGraphQlClient) {
         return Flux.fromIterable(this.dataFetchers())
                 .flatMap(r -> {
                     try {
@@ -34,7 +34,7 @@ public interface AggregateRemoteDataFederation {
 
 
     default Publisher<ClientGraphQlResponse> get(FederatedRequestData environment,
-                                                 FederatedGraphQlClientBuilder.FederatedGraphQlClient.FederatedGraphQlRequestArgs federatedGraphQlClient) {
+                                                 FederatedGraphQlClientBuilderHolder.FederatedGraphQlClient.FederatedGraphQlRequestArgs federatedGraphQlClient) {
         return aggregate(fetch(environment, federatedGraphQlClient));
     }
 }
