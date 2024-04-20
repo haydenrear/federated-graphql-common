@@ -13,26 +13,87 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.graphql.GraphQlRequest;
+import org.springframework.graphql.GraphQlResponse;
 import org.springframework.graphql.client.ClientGraphQlRequest;
 import org.springframework.graphql.client.ClientGraphQlResponse;
 import org.springframework.graphql.client.GraphQlTransport;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.net.ConnectException;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.function.Supplier;
+
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Flux;
+
 
 public interface FederatedItemGraphQlTransport<R extends GraphQlRequest> extends GraphQlTransport {
 
     Publisher<ClientGraphQlResponse> next(R request);
 
+    default Publisher<GraphQlResponse> nextGraphQlResponse(R request) {
+        return Flux.from(this.next(request));
+    }
+
     default Optional<FederatedGraphQlServiceItemId> serviceItemId() {
         return Optional.empty();
     }
 
+    interface GraphQlTransportFailureAction {
+        void failureEvent();
+        boolean matches(Throwable throwable);
+    }
+
+    @AllArgsConstructor
+    class EmitFailureEventFailureAction implements GraphQlTransportFailureAction {
+
+        Supplier<String> failureCallable;
+
+        @Override
+        public void failureEvent() {
+            failureCallable.get();
+        }
+
+        @Override
+        public boolean matches(Throwable throwable) {
+            return switch(throwable) {
+                case WebClientResponseException w -> w.getStatusCode().is4xxClientError() || w.getStatusCode().is5xxServerError();
+                case ConnectException io -> true;
+                case IOException io -> true;
+                default -> false;
+            };
+        }
+    }
+
+    @AllArgsConstructor
+    class UnregisterGraphQlTransportFailureAction implements GraphQlTransportFailureAction {
+
+        Supplier<String> failureCallable;
+
+
+        @Override
+        public void failureEvent() {
+            failureCallable.get();
+        }
+
+        @Override
+        public boolean matches(Throwable throwable) {
+            return switch(throwable) {
+                case WebClientResponseException w -> w.getStatusCode().is4xxClientError() || w.getStatusCode().is5xxServerError();
+                case ConnectException io -> true;
+                case IOException io -> true;
+                default -> false;
+            };
+        }
+    }
+
 
     /**
-     * Multiple of these delegates are created, each one of them providing a different underlying GraphQlTransport, for
-     * example to send GraphQl queries to other services. This is for when instead of providing a DataFetcher, the client
-     * sends multiple queries with different MimeTypes, and the service is chosen based on the MimeType.
+     * The graphQl transport that is accessed once the DataFetcher has been retrieved, one created for each instance
+     * of each data service.
      */
     @AllArgsConstructor
     class GraphQlTransportDelegate implements FederatedItemGraphQlTransport<ClientFederatedRequestItem> {
@@ -42,10 +103,14 @@ public interface FederatedItemGraphQlTransport<R extends GraphQlRequest> extends
         private final Encoder<?> encoder;
         private final Decoder<?> decoder;
         private final FederatedGraphQlServiceItemId serviceItemId;
+        private final List<GraphQlTransportFailureAction> failures;
 
         @Override
         public Publisher<ClientGraphQlResponse> next(ClientFederatedRequestItem request) {
             return graphQlTransport.execute(request)
+                    .doOnError(t -> failures.stream().filter(f -> f.matches(t))
+                            .forEach(GraphQlTransportFailureAction::failureEvent)
+                    )
                     .map(g -> new DefaultClientGraphQlResponse(request, g, encoder, decoder));
         }
 

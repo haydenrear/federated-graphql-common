@@ -2,6 +2,7 @@ package com.hayden.graphql.models.visitor.datafetcher;
 
 import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceItemId;
 import com.hayden.graphql.models.visitor.*;
+import com.hayden.graphql.models.visitor.schema.GraphQlFederatedSchemaSource;
 import graphql.schema.DataFetcher;
 import lombok.extern.slf4j.Slf4j;
 

@@ -2,13 +2,8 @@ package com.hayden.graphql.models.visitor.simpletransport;
 
 import com.hayden.graphql.federated.transport.http.HttpGraphQlTransportBuilder;
 import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceItemId;
-import com.hayden.graphql.models.visitor.DataTemplate;
-import com.hayden.graphql.models.visitor.GraphQlFederatedSchemaSource;
 import com.hayden.graphql.models.visitor.VisitorModel;
-import com.hayden.graphql.models.visitor.datafed.DataFederationSources;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.Collection;
 
 /**
  * TODO: create a request for delete of schema from TypeRegistry.
@@ -20,8 +15,6 @@ import java.util.Collection;
 @Slf4j
 public record GraphQlTransportModel(
         FederatedGraphQlServiceItemId serviceId,
-        HttpGraphQlTransportBuilder transportBuilder,
-        DataTemplate dataTemplate
-)
-        implements VisitorModel {
+        HttpGraphQlTransportBuilder transportBuilder
+) implements VisitorModel {
 }

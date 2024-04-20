@@ -1,4 +1,4 @@
-package com.hayden.graphql.models.visitor.datafetcher;
+package com.hayden.graphql.models.visitor.schema;
 
 import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceItemId;
 import com.hayden.graphql.models.visitor.VisitorModel;

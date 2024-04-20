@@ -1,8 +1,16 @@
 package com.hayden.graphql.federated.transport;
 
+import com.google.common.collect.Lists;
 import com.hayden.graphql.federated.client.FederatedGraphQlClientBuilderHolder;
+import com.hayden.graphql.federated.error.GraphQlTransportError;
 import com.hayden.graphql.federated.transport.health.HealthEvent;
+import com.hayden.graphql.models.federated.response.DefaultClientGraphQlResponse;
+import com.hayden.utilitymodule.result.Result;
+import graphql.ExecutionInput;
+import graphql.ExecutionResult;
+import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.reactivestreams.Publisher;
@@ -13,11 +21,11 @@ import com.hayden.graphql.models.federated.request.FederatedGraphQlRequest;
 import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceItemId;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
-import org.springframework.graphql.GraphQlRequest;
-import org.springframework.graphql.GraphQlResponse;
+import org.springframework.graphql.*;
 import org.springframework.graphql.client.AbstractGraphQlClientBuilder;
 import org.springframework.graphql.client.ClientGraphQlRequest;
 import org.springframework.graphql.client.ClientGraphQlResponse;
+import org.springframework.graphql.support.DefaultExecutionGraphQlResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ClassUtils;
 import reactor.core.publisher.Flux;
@@ -32,12 +40,14 @@ import java.util.function.BiConsumer;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<FederatedGraphQlRequest> {
 
     protected static final boolean jackson2Present = ClassUtils.isPresent(
             "com.fasterxml.jackson.databind.ObjectMapper", AbstractGraphQlClientBuilder.class.getClassLoader());
 
-    private final Map<FederatedGraphQlServiceItemId.FederatedGraphQlServiceId, List<FederatedItemGraphQlTransport<? extends ClientGraphQlRequest>>> transports = new ConcurrentHashMap<>();
+    private final Map<FederatedGraphQlServiceItemId.FederatedGraphQlServiceId, List<FederatedItemGraphQlTransport<? extends ClientGraphQlRequest>>> transports 
+            = new ConcurrentHashMap<>();
 
     private final Map<String, List<FederatedGraphQlServiceItemId>> transportsIndex = new ConcurrentHashMap<>();
 
@@ -52,7 +62,10 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
         return Flux.fromStream(request.delegators().entrySet().stream())
                 .flatMap(to -> {
                     FederatedGraphQlRequest.FederatedClientGraphQlRequestItem value = to.getValue();
-                    return getCastTransport(value).next(value);
+                    return getCastTransport(value)
+                            .mapError(error -> log.error("Error when retrieving graphql transport: {}.", error))
+                            .map(g -> g.next(value))
+                            .orElse(Flux.just(graphQlTransportErrorResponse(request)));
                 });
     }
 
@@ -63,11 +76,16 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
 
     @Override
     public @NotNull Flux<GraphQlResponse> executeSubscription(@NotNull GraphQlRequest request) {
+        return doExecute(request);
+    }
+
+    private Flux<GraphQlResponse> doExecute(@NotNull GraphQlRequest request) {
         return Mono.justOrEmpty(getCastTransport(request))
-                .flatMapMany(e -> Flux.from(e.next(request))
-                        .doOnError(t -> e.serviceItemId()
-                                .ifPresent(s -> applicationEventPublisher.publishEvent(new HealthEvent.FailedHealthEvent(s))))
-                )
+                .flatMapMany(e -> Flux.just(
+                        e.mapError(error -> log.error("Error when retrieving graphql transport: {}.", error))
+                                .map(g -> g.nextGraphQlResponse(request))
+                                .orElse(Flux.just(graphQlTransportErrorResponse(request)))
+                ))
                 // in the case where a service is failing, it will be removed.
                 .retryWhen(Retry.backoff(5, Duration.ofMillis(500)))
                 .cast(GraphQlResponse.class);
@@ -81,11 +99,13 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
         }
     }
 
-    public FederatedItemGraphQlTransport<? extends GraphQlRequest> transport(GraphQlRequest request) {
+    public @Nullable FederatedItemGraphQlTransport<? extends GraphQlRequest> transport(GraphQlRequest request) {
         return switch(request) {
-            case FederatedGraphQlRequest ignored ->  this;
             case FederatedGraphQlRequest.FederatedClientGraphQlRequestItem item -> mapTo(item.service())
-                    .orElse(null);
+                    .orElseGet(() -> {
+                        log.error("Error when attempting to get transport for {}. Could not find transport for service.", item.service());
+                        return null;
+                    });
             case GraphQlRequest ignored -> this.fetcherGraphQlTransport;
         };
     }
@@ -101,7 +121,7 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
     public BiConsumer<String, FederatedGraphQlServiceItemId> register(GraphQlRegistration federatedGraphQlTransport) {
         Optional.ofNullable(switch (federatedGraphQlTransport) {
                     case GraphQlRegistration.GraphQlTransportFederatedGraphQlRegistration g ->
-                            Pair.of(new FederatedItemGraphQlTransport.GraphQlTransportDelegate(g.graphQlTransport(), jsonEncoder, jsonDecoder, g.id()), g.id());
+                            Pair.of(transportDelegate(g), g.id());
                     case GraphQlRegistration.FederatedItemFederatedGraphQlTransportRegistration g ->
                             Pair.of(g.graphQlTransport(), g.id());
                     default -> throw new NotImplementedException("%s did not exist.".formatted(federatedGraphQlTransport.getClass().getSimpleName()));
@@ -111,20 +131,43 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
         return this::unregister;
     }
 
-    public void unregister(String id, FederatedGraphQlServiceItemId serviceId) {
+    private @NotNull GraphQlTransportDelegate transportDelegate(GraphQlRegistration.GraphQlTransportFederatedGraphQlRegistration g) {
+        return new GraphQlTransportDelegate(
+                g.graphQlTransport(), jsonEncoder, jsonDecoder, g.id(),
+                Lists.newArrayList(
+                        new UnregisterGraphQlTransportFailureAction(() -> unregister(g.id().host(), g.id())),
+                        new EmitFailureEventFailureAction(() -> publishFailEvent(g))
+                )
+        );
+    }
+
+    private String publishFailEvent(GraphQlRegistration.GraphQlTransportFederatedGraphQlRegistration g) {
+        applicationEventPublisher.publishEvent(new HealthEvent.FailedHealthEvent(g.id()));
+        return "Fail Event for %s".formatted(g.id());
+    }
+
+    public String unregister(String id, FederatedGraphQlServiceItemId serviceId) {
         this.transports.computeIfPresent(serviceId.id(), (key, prev) -> {
             prev.removeIf(f -> f.serviceItemId().filter(s -> s.equals(serviceId)).isPresent());
             return prev;
         });
-        this.transportsIndex.get(serviceId.serviceId());
+        this.transportsIndex.computeIfPresent(serviceId.id().serviceId(), (key, prev) -> {
+            prev.removeIf(f -> f.equals(serviceId));
+            return prev;
+        });
+        return id;
     }
 
     @SuppressWarnings("unchecked")
-    private FederatedItemGraphQlTransport<GraphQlRequest> getCastTransport(@NotNull GraphQlRequest request) {
-        return (FederatedItemGraphQlTransport<GraphQlRequest>) this.transport(request);
+    private Result<FederatedItemGraphQlTransport<GraphQlRequest>, Result.Error> getCastTransport(@NotNull GraphQlRequest request) {
+        return Optional.ofNullable(this.transport(request))
+                .map(Result::fromResult)
+                .orElse(Result.fromError("Error retrieving"))
+                .map(f -> (FederatedItemGraphQlTransport<GraphQlRequest>) f);
     }
 
-    private void registerGraphQlTransport(GraphQlRegistration federatedGraphQlTransport, Pair<? extends FederatedItemGraphQlTransport<? extends ClientGraphQlRequest>, FederatedGraphQlServiceItemId> g) {
+    private void registerGraphQlTransport(GraphQlRegistration federatedGraphQlTransport, 
+                                          Pair<? extends FederatedItemGraphQlTransport<? extends ClientGraphQlRequest>, FederatedGraphQlServiceItemId> g) {
         registerTransport(federatedGraphQlTransport, g);
         registerIndex(federatedGraphQlTransport, g);
     }
@@ -148,6 +191,32 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
             prev.add(g.getLeft());
             return prev;
         });
+    }
+
+    private GraphQlResponse graphQlTransportErrorResponse(@NotNull GraphQlRequest request) {
+        return new DefaultExecutionGraphQlResponse(
+                ExecutionInput.newExecutionInput()
+                        .query(request.getDocument())
+                        .build(),
+                ExecutionResult.newExecutionResult()
+                        .addError(new GraphQlTransportError("Error retrieving GraphQl Transport. Please try again."))
+                        .build()
+        );
+    }
+
+    private ClientGraphQlResponse graphQlTransportErrorResponse(@NotNull ClientGraphQlRequest request) {
+        return new DefaultClientGraphQlResponse(
+                request,
+                new DefaultExecutionGraphQlResponse(
+                        ExecutionInput.newExecutionInput()
+                                .build(),
+                        ExecutionResult.newExecutionResult()
+                                .addError(new GraphQlTransportError("Error retrieving GraphQl Transport. Please try again."))
+                                .build()
+                ),
+                jsonEncoder,
+                jsonDecoder
+        );
     }
 
 }

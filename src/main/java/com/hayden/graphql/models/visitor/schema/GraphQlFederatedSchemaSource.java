@@ -1,4 +1,4 @@
-package com.hayden.graphql.models.visitor;
+package com.hayden.graphql.models.visitor.schema;
 
 import com.hayden.graphql.models.GraphQlTarget;
 
