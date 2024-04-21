@@ -1,6 +1,4 @@
-package com.hayden.graphql.federated.transport;
-
-import com.hayden.graphql.federated.transport.FederatedGraphQlTransport;
+package com.hayden.graphql.federated.transport.federated_transport;
 
 public record FederatedGraphQlTransportResult(
         boolean doReload,

@@ -1,6 +1,8 @@
-package com.hayden.graphql.federated.transport;
+package com.hayden.graphql.federated.transport.federated_transport;
 
 import com.hayden.graphql.federated.client.FederatedGraphQlClientBuilderHolder;
+import com.hayden.graphql.federated.transport.fetcher_transport.FetcherGraphQlTransport;
+import com.hayden.graphql.federated.transport.health.GraphQlTransportFailureAction;
 import com.hayden.graphql.models.federated.request.ClientFederatedRequestItem;
 import com.hayden.graphql.models.federated.response.DefaultClientGraphQlResponse;
 import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceItemId;
@@ -19,14 +21,9 @@ import org.springframework.graphql.client.ClientGraphQlResponse;
 import org.springframework.graphql.client.GraphQlTransport;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.net.ConnectException;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Callable;
-import java.util.function.Supplier;
 
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 
 
@@ -40,54 +37,6 @@ public interface FederatedItemGraphQlTransport<R extends GraphQlRequest> extends
 
     default Optional<FederatedGraphQlServiceItemId> serviceItemId() {
         return Optional.empty();
-    }
-
-    interface GraphQlTransportFailureAction {
-        void failureEvent();
-        boolean matches(Throwable throwable);
-    }
-
-    @AllArgsConstructor
-    class EmitFailureEventFailureAction implements GraphQlTransportFailureAction {
-
-        Supplier<String> failureCallable;
-
-        @Override
-        public void failureEvent() {
-            failureCallable.get();
-        }
-
-        @Override
-        public boolean matches(Throwable throwable) {
-            return switch(throwable) {
-                case WebClientResponseException w -> w.getStatusCode().is4xxClientError() || w.getStatusCode().is5xxServerError();
-                case ConnectException io -> true;
-                case IOException io -> true;
-                default -> false;
-            };
-        }
-    }
-
-    @AllArgsConstructor
-    class UnregisterGraphQlTransportFailureAction implements GraphQlTransportFailureAction {
-
-        Supplier<String> failureCallable;
-
-
-        @Override
-        public void failureEvent() {
-            failureCallable.get();
-        }
-
-        @Override
-        public boolean matches(Throwable throwable) {
-            return switch(throwable) {
-                case WebClientResponseException w -> w.getStatusCode().is4xxClientError() || w.getStatusCode().is5xxServerError();
-                case ConnectException io -> true;
-                case IOException io -> true;
-                default -> false;
-            };
-        }
     }
 
 

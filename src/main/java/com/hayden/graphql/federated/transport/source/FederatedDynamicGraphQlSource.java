@@ -1,4 +1,4 @@
-package com.hayden.graphql.federated.transport;
+package com.hayden.graphql.federated.transport.source;
 
 import com.netflix.graphql.dgs.DgsQueryExecutor;
 import com.netflix.graphql.dgs.internal.DefaultDgsQueryExecutor;

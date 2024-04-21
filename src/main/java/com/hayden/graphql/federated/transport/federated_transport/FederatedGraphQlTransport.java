@@ -1,9 +1,12 @@
-package com.hayden.graphql.federated.transport;
+package com.hayden.graphql.federated.transport.federated_transport;
 
 import com.google.common.collect.Lists;
 import com.hayden.graphql.federated.client.FederatedGraphQlClientBuilderHolder;
 import com.hayden.graphql.federated.error.GraphQlTransportError;
+import com.hayden.graphql.federated.transport.health.EmitFailureEventFailureAction;
 import com.hayden.graphql.federated.transport.health.HealthEvent;
+import com.hayden.graphql.federated.transport.health.UnregisterGraphQlTransportFailureAction;
+import com.hayden.graphql.federated.transport.register.GraphQlRegistration;
 import com.hayden.graphql.models.federated.response.DefaultClientGraphQlResponse;
 import com.hayden.utilitymodule.result.Result;
 import graphql.ExecutionInput;

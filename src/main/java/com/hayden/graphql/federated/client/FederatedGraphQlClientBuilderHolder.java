@@ -1,9 +1,9 @@
 package com.hayden.graphql.federated.client;
 
 import com.hayden.graphql.federated.execution.DataServiceRequestExecutor;
-import com.hayden.graphql.federated.transport.FederatedGraphQlTransportResult;
+import com.hayden.graphql.federated.transport.federated_transport.FederatedGraphQlTransportResult;
 import com.hayden.graphql.federated.interceptor.GraphQlFederatedInterceptor;
-import com.hayden.graphql.federated.transport.FederatedGraphQlTransport;
+import com.hayden.graphql.federated.transport.federated_transport.FederatedGraphQlTransport;
 import com.hayden.graphql.models.federated.request.FederatedRequestData;
 import com.hayden.graphql.models.federated.response.FederatedClientGraphQlResponse;
 import lombok.RequiredArgsConstructor;

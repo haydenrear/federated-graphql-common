@@ -1,5 +1,6 @@
-package com.hayden.graphql.federated.transport;
+package com.hayden.graphql.federated.transport.fetcher_transport;
 
+import com.hayden.graphql.federated.transport.source.FederatedDynamicGraphQlSource;
 import graphql.ExecutionResult;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
