@@ -1,6 +1,7 @@
 package com.hayden.graphql.federated.transport.http;
 
 import com.hayden.graphql.federated.response.ResponseMapGraphQlResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.graphql.GraphQlRequest;
 import org.springframework.graphql.GraphQlResponse;
@@ -16,13 +17,16 @@ import java.util.Map;
 
 
 /**
- * Transport to execute GraphQL requests over HTTP via {@link WebClient}.
+ * Extension of ...
+ *    Transport to execute GraphQL requests over HTTP via {@link WebClient}.
  *
- * <p>Supports only single-response requests over HTTP POST. For subscriptions,
+ *    <p>Supports only single-response requests over HTTP POST. For subscriptions,
  *
- * @author Rossen Stoyanchev
- * @since 1.0.0
+ *    @author Rossen Stoyanchev
+ *    @since 1.0.0
+ * ...
  */
+@Slf4j
 public final class HttpGraphQlTransport implements GraphQlTransport {
 
     private static final ParameterizedTypeReference<Map<String, Object>> MAP_TYPE =
@@ -62,6 +66,10 @@ public final class HttpGraphQlTransport implements GraphQlTransport {
                 .attributes(attributes -> {
                     if (request instanceof ClientGraphQlRequest clientRequest) {
                         attributes.putAll(clientRequest.getAttributes());
+                    } else {
+                        throw new UnsupportedOperationException("""
+                                Received GraphQL request that was not client graphQL request inside of %s.
+                                """.formatted(this.getClass().getSimpleName()));
                     }
                 })
                 .retrieve()

@@ -1,4 +1,4 @@
 package com.hayden.graphql.models.federated.request;
 
-public record FederatedRequestData(FederatedRequestDataItem[] data) {
+public record FederatedRequestData(FederatedRequestDataItem... data) {
 }

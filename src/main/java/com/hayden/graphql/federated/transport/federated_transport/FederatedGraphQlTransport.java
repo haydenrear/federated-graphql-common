@@ -39,6 +39,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 
 
 @RequiredArgsConstructor
@@ -129,9 +130,23 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
                             Pair.of(g.graphQlTransport(), g.id());
                     default -> throw new NotImplementedException("%s did not exist.".formatted(federatedGraphQlTransport.getClass().getSimpleName()));
                 })
-                .ifPresent(g -> registerGraphQlTransport(federatedGraphQlTransport, g));
+                .ifPresent(g -> {
+                    FederatedItemGraphQlTransport<ClientGraphQlRequest> left = getFederatedItemGraphQlTransport(g);
+                    registerGraphQlTransport(federatedGraphQlTransport, left, g.getRight());
+                });
 
         return this::unregister;
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static FederatedItemGraphQlTransport<ClientGraphQlRequest> getFederatedItemGraphQlTransport(
+            Pair<? extends FederatedItemGraphQlTransport<? extends ClientGraphQlRequest>, FederatedGraphQlServiceItemId> g
+    ) {
+        if  (g.getLeft() instanceof FederatedItemGraphQlTransport transport) {
+            return transport;
+        }
+
+        return null;
     }
 
     private @NotNull GraphQlTransportDelegate transportDelegate(GraphQlRegistration.GraphQlTransportFederatedGraphQlRegistration g) {
@@ -161,37 +176,43 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
         return id;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private Result<FederatedItemGraphQlTransport<GraphQlRequest>, Result.Error> getCastTransport(@NotNull GraphQlRequest request) {
         return Optional.ofNullable(this.transport(request))
                 .map(Result::fromResult)
                 .orElse(Result.fromError("Error retrieving"))
-                .map(f -> (FederatedItemGraphQlTransport<GraphQlRequest>) f);
+                .flatMap(f -> f instanceof FederatedItemGraphQlTransport t
+                        ? Result.fromResult(t)
+                        : Result.emptyError()
+                );
     }
 
-    private void registerGraphQlTransport(GraphQlRegistration federatedGraphQlTransport, 
-                                          Pair<? extends FederatedItemGraphQlTransport<? extends ClientGraphQlRequest>, FederatedGraphQlServiceItemId> g) {
-        registerTransport(federatedGraphQlTransport, g);
-        registerIndex(federatedGraphQlTransport, g);
+    private void registerGraphQlTransport(GraphQlRegistration federatedGraphQlTransport,
+                                          FederatedItemGraphQlTransport<ClientGraphQlRequest> transport,
+                                          FederatedGraphQlServiceItemId serviceItemId) {
+        registerTransport(federatedGraphQlTransport, transport);
+        registerIndex(federatedGraphQlTransport, serviceItemId);
     }
 
 
-    private void registerIndex(GraphQlRegistration federatedGraphQlTransport, Pair<? extends FederatedItemGraphQlTransport<? extends ClientGraphQlRequest>, FederatedGraphQlServiceItemId> g) {
+    private void registerIndex(GraphQlRegistration federatedGraphQlTransport,
+                               FederatedGraphQlServiceItemId serviceItemId) {
         this.transportsIndex.compute(federatedGraphQlTransport.id().id().serviceId(), (key, prev) -> {
             if (prev == null)
                 prev = new ArrayList<>();
 
-            prev.add(g.getRight());
+            prev.add(serviceItemId);
             return prev;
         });
     }
 
-    private void registerTransport(GraphQlRegistration federatedGraphQlTransport, Pair<? extends FederatedItemGraphQlTransport<? extends ClientGraphQlRequest>, FederatedGraphQlServiceItemId> g) {
+    private void registerTransport(GraphQlRegistration federatedGraphQlTransport,
+                                   FederatedItemGraphQlTransport<ClientGraphQlRequest> transport) {
         this.transports.compute(federatedGraphQlTransport.id().id(), (key, prev) -> {
             if (prev == null)
                 prev = new ArrayList<>();
 
-            prev.add(g.getLeft());
+            prev.add(transport);
             return prev;
         });
     }

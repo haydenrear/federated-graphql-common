@@ -17,3 +17,9 @@ java {
     sourceCompatibility = JavaVersion.VERSION_21
 }
 
+tasks.generateJava {
+    schemaPaths.add("${projectDir}/src/main/resources/graphql")
+    packageName = "com.hayden.gateway.codegen"
+    generateClient = true
+}
+
