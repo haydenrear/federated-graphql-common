@@ -37,7 +37,7 @@ public class FederatedGraphQlClientBuilderHolder extends AbstractGraphQlClientBu
 		implements GraphQlClient.Builder<FederatedGraphQlClientBuilderHolder>, AutoCloseable, IFederatedGraphQlClientBuilder {
 
 	protected static final boolean jackson2Present = ClassUtils.isPresent(
-			"com.fasterxml.jackson.databind.ObjectMapper", AbstractGraphQlClientBuilder.class.getClassLoader());
+			"com.fasterxml.jackson.databind.ObjectMapper", FederatedGraphQlClientBuilderHolder.class.getClassLoader());
 
 
 	private final List<GraphQlClientInterceptor> interceptors = List.of(new GraphQlFederatedInterceptor());
@@ -45,12 +45,11 @@ public class FederatedGraphQlClientBuilderHolder extends AbstractGraphQlClientBu
 	private FederatedGraphQlClient clientBuilt;
 
 	/**
-	 * Connection pool proxy ref for close to add back to connection pool. Sort of like self-decorator - pass myself to someone
+	 * proxy ref for close to add back to connection pool. Sort of like self-decorator - pass myself to someone
 	 * else, that someone else passes me myself decorated and now I use that ref to call.
 	 */
 	@Setter
-	private IFederatedGraphQlClientBuilder proxyRef;
-
+	private IFederatedGraphQlClientBuilder selfRef;
 
 	@Nullable
 	private Encoder<?> jsonEncoder;
@@ -70,7 +69,8 @@ public class FederatedGraphQlClientBuilderHolder extends AbstractGraphQlClientBu
 				.filter(buildClientExists -> !transport.doReload())
 				.orElseGet(() -> {
 					DefaultFederatedGraphQlClient graphQlClient = buildGraphQlClient(transport.transport());
-					return new FederatedGraphQlClient(graphQlClient, Optional.ofNullable(proxyRef).orElse(this));
+					this.clientBuilt = new FederatedGraphQlClient(graphQlClient, Optional.ofNullable(selfRef).orElse(this));
+					return this.clientBuilt;
 				});
 	}
 
@@ -131,8 +131,11 @@ public class FederatedGraphQlClientBuilderHolder extends AbstractGraphQlClientBu
 	}
 
 	@Override
-	public void close() {
-		log.info("Closing...");
+	public void close() throws Exception {
+		if (this.clientBuilt != null)
+			this.clientBuilt.close();
+		if (this.selfRef != null)
+			this.selfRef.close();
 	}
 
 	private Encoder<?> getEncoder() {
