@@ -132,10 +132,8 @@ public class FederatedGraphQlClientBuilderHolder extends AbstractGraphQlClientBu
 
 	@Override
 	public void close() throws Exception {
-		if (this.clientBuilt != null)
-			this.clientBuilt.close();
-		if (this.selfRef != null)
-			this.selfRef.close();
+		// don't really need to do anything here.
+		log.debug("Adding back connection pool for client graphQl.");
 	}
 
 	private Encoder<?> getEncoder() {
