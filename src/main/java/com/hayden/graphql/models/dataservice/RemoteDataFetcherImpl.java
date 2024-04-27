@@ -29,11 +29,6 @@ public abstract class RemoteDataFetcherImpl<T> implements RemoteDataFetcher<T>, 
     @Autowired
     private FederatedExecutionGraphQlService executionService;
 
-    @Override
-    @Autowired
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-    }
 
     /**
      * Ability to retrieve any bean from the context.
@@ -48,6 +43,11 @@ public abstract class RemoteDataFetcherImpl<T> implements RemoteDataFetcher<T>, 
                 return applicationContext.getBean(clzz, args);
             }
         };
+    }
+
+    @Override
+    public T get(DataFetchingEnvironment environment) throws Exception {
+        return null;
     }
 
     @Override
@@ -87,5 +87,11 @@ public abstract class RemoteDataFetcherImpl<T> implements RemoteDataFetcher<T>, 
             }
         }).collect(Collectors.toList());
         return this.from(value);
+    }
+
+    @Override
+    @Autowired
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 }

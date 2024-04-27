@@ -7,6 +7,7 @@ import graphql.schema.GraphQLSchema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.execution.GraphQlSource;
 import org.springframework.stereotype.Component;
 
@@ -19,42 +20,27 @@ public class FederatedDynamicGraphQlSource implements GraphQlSource {
     private GraphQLSchema graphQLSchema;
 
 
-    private final DgsQueryExecutor queryExecutor;
+    @Autowired
+    private DgsQueryExecutor queryExecutor;
 
-
-    volatile boolean doReload;
-
-
-    public void setReload() {
-        doReload = true;
-    }
-
-
-    private void reload() {
+    public void reload(boolean doReload) {
         if (this.graphQLSchema == null) {
-            this.graphQLSchema = ((DefaultDgsQueryExecutor) queryExecutor).getSchema().get();
+            this.graphQLSchema = ((DefaultDgsQueryExecutor)queryExecutor).getSchema().get();
             this.graphQl = GraphQL.newGraphQL(this.graphQLSchema).build();
         }
         if (doReload) {
-            synchronized (this) {
-                if (doReload) {
-                    this.graphQLSchema = ((DefaultDgsQueryExecutor)queryExecutor).getSchema().get();
-                    this.graphQl = GraphQL.newGraphQL(this.graphQLSchema).build();
-                    doReload = false;
-                }
-            }
+            this.graphQLSchema = ((DefaultDgsQueryExecutor)queryExecutor).getSchema().get();
+            this.graphQl = GraphQL.newGraphQL(this.graphQLSchema).build();
         }
     }
 
     @Override
     public @NotNull GraphQL graphQl() {
-        reload();
         return graphQl;
     }
 
     @Override
     public @NotNull GraphQLSchema schema() {
-        reload();
         return graphQLSchema;
     }
 }

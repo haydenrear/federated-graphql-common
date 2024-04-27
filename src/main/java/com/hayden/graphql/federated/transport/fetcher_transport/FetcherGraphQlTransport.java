@@ -1,11 +1,11 @@
 package com.hayden.graphql.federated.transport.fetcher_transport;
 
-import com.hayden.graphql.federated.transport.source.FederatedDynamicGraphQlSource;
+import com.hayden.graphql.federated.FederatedGraphQlSourceProvider;
 import graphql.ExecutionResult;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.reactivestreams.Publisher;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.*;
 import org.springframework.graphql.client.GraphQlTransport;
 import org.springframework.graphql.execution.DefaultExecutionGraphQlService;
@@ -27,27 +27,22 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FetcherGraphQlTransport implements GraphQlTransport {
 
-    private ExecutionGraphQlService graphQlClient;
-
-
-    private final FederatedDynamicGraphQlSource federatedGraphQlSource;
+    @Autowired
+    private FederatedGraphQlSourceProvider federatedGraphQlSource;
 
     protected static final IdGenerator idGenerator = new AlternativeJdkIdGenerator();
 
-    @PostConstruct
-    public void create() {
-        this.graphQlClient = new DefaultExecutionGraphQlService(federatedGraphQlSource);
-    }
-
     @Override
     public @NotNull Mono<GraphQlResponse> execute(@NotNull GraphQlRequest request) {
-        return graphQlClient.execute(toExecutionRequest(request))
+        return federatedGraphQlSource.executionGraphQlService()
+                .execute(toExecutionRequest(request))
                 .cast(GraphQlResponse.class);
     }
 
     @Override
     public @NotNull Flux<GraphQlResponse> executeSubscription(@NotNull GraphQlRequest request) {
-        return graphQlClient.execute(toExecutionRequest(request))
+        return federatedGraphQlSource.executionGraphQlService()
+                .execute(toExecutionRequest(request))
                 .flatMapMany(response -> {
                     try {
                         Object data = response.getData();

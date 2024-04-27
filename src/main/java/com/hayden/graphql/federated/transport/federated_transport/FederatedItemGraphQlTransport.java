@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.graphql.GraphQlRequest;
@@ -79,6 +80,7 @@ public interface FederatedItemGraphQlTransport<R extends GraphQlRequest> extends
 
         @Delegate
         private final FetcherGraphQlTransport fetcherGraphQlTransport;
+
         @Autowired(required = false)
         @SuppressWarnings("rawtypes")
         private Encoder encoder;

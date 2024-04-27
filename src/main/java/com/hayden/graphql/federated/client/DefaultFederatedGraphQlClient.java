@@ -2,11 +2,14 @@ package com.hayden.graphql.federated.client;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hayden.graphql.federated.interceptor.GraphQlFederatedInterceptor;
 import com.hayden.graphql.models.federated.request.ClientFederatedRequestItem;
 import com.hayden.graphql.models.federated.request.FederatedGraphQlRequest;
 import com.hayden.graphql.models.federated.request.FederatedRequestData;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.graphql.client.*;
 import reactor.core.publisher.Flux;
@@ -32,7 +35,7 @@ public class DefaultFederatedGraphQlClient {
 
     public FederatedRequestSpec federatedDocuments(FederatedRequestData requestData,
                                                    FederatedGraphQlClientBuilderHolder.FederatedGraphQlClient.FederatedGraphQlRequestArgs federatedGraphQlClient) {
-        return new FederatedRequestSpec(requestData, federatedGraphQlClient);
+        return new FederatedRequestSpec(requestData, federatedGraphQlClient, new ObjectMapper());
     }
 
 
@@ -41,6 +44,7 @@ public class DefaultFederatedGraphQlClient {
 
         private final FederatedRequestData requestData;
         private final FederatedGraphQlClientBuilderHolder.FederatedGraphQlClient.FederatedGraphQlRequestArgs client;
+        private final ObjectMapper om;
 
 
         public Flux<ClientGraphQlResponse> execute() {
@@ -53,14 +57,21 @@ public class DefaultFederatedGraphQlClient {
 
         private Mono<FederatedGraphQlRequest> initRequest() {
             return Flux.fromArray(this.requestData.data())
-                    .map(document -> Pair.of(document.federatedService(), new ClientFederatedRequestItem(
-                            document.requestBody(),
-                            document.operationName(),
-                            document.variables(),
-                            document.extensions(),
-                            document.attributes(),
-                            requestData, client
-                    )))
+                    .flatMap(document -> {
+                        try {
+                            return Flux.just(Pair.of(document.federatedService(), new ClientFederatedRequestItem(
+                                    om.writeValueAsString(document.requestBody()),
+                                    document.operationName(),
+                                    document.variables(),
+                                    document.extensions(),
+                                    document.attributes(),
+                                    requestData, client
+                            )));
+                        } catch (JsonProcessingException e) {
+                            return Flux.error(e);
+                        }
+                    })
+//                    .doOnError(t -> log.error("{}", t.getMessage()))
                     .map(p -> Map.entry(p.getKey(), new FederatedGraphQlRequest.FederatedClientGraphQlRequestItem(p.getKey(), p.getRight())))
                     .collectMap(Map.Entry::getKey, Map.Entry::getValue)
                     .map(FederatedGraphQlRequest::new);
