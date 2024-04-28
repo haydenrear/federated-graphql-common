@@ -14,21 +14,16 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.graphql.client.ClientGraphQlRequest;
-import org.springframework.graphql.client.ClientGraphQlResponse;
-import org.springframework.graphql.client.GraphQlClientInterceptor;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.MimeType;
 import reactor.test.StepVerifier;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 
 @SpringBootTest(classes = {
         FederatedDynamicGraphQlSource.class, FederatedGraphQlTransport.class,
-        FederatedItemGraphQlTransport.FetcherGraphQlTransportDelegate.class,
+        FederatedItemGraphQlTransport.CallDataFetchersFederatedGraphQlTransport.class,
         ApplicationEventPublisher.class, FetcherGraphQlTransport.class
 })
 @ExtendWith(SpringExtension.class)
@@ -38,7 +33,7 @@ class FederatedGraphQlTransportTest {
     @Autowired
     FederatedGraphQlTransport transport;
     @Autowired
-    FederatedItemGraphQlTransport.FetcherGraphQlTransportDelegate fetcherGraphQlTransportDelegate;
+    FederatedItemGraphQlTransport.CallDataFetchersFederatedGraphQlTransport callDataFetchersFederatedGraphQlTransport;
     @Autowired
     FetcherGraphQlTransport fetcherGraphQlTransport;
 
@@ -69,7 +64,8 @@ class FederatedGraphQlTransportTest {
     }
 
     private static @NotNull ClientFederatedRequestItem createRequestItem() {
-        return new ClientFederatedRequestItem();
+//        return new ClientFederatedRequestItem();
+        return null;
     }
 
     @Test

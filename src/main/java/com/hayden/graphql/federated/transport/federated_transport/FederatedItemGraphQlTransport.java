@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.graphql.GraphQlRequest;
@@ -46,7 +45,7 @@ public interface FederatedItemGraphQlTransport<R extends GraphQlRequest> extends
      * of each data service.
      */
     @AllArgsConstructor
-    class GraphQlTransportDelegate implements FederatedItemGraphQlTransport<ClientFederatedRequestItem> {
+    class FederatedTransportsGraphQlTransportDelegate implements FederatedItemGraphQlTransport<ClientFederatedRequestItem> {
 
         @Delegate
         private final GraphQlTransport graphQlTransport;
@@ -76,7 +75,7 @@ public interface FederatedItemGraphQlTransport<R extends GraphQlRequest> extends
      */
     @RequiredArgsConstructor
     @Component
-    class FetcherGraphQlTransportDelegate implements FederatedItemGraphQlTransport<ClientGraphQlRequest> {
+    class CallDataFetchersFederatedGraphQlTransport implements FederatedItemGraphQlTransport<ClientGraphQlRequest> {
 
         @Delegate
         private final FetcherGraphQlTransport fetcherGraphQlTransport;

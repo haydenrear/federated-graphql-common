@@ -73,17 +73,17 @@ public abstract class RemoteDataFetcherImpl<T> implements RemoteDataFetcher<T>, 
         } catch (InterruptedException |
                  ExecutionException e) {
             log.error("Error when attempting to get response: {}.", e.getMessage());
-            return Result.fromError(new RemoteDataFetcherError(e));
+            return Result.err(new RemoteDataFetcherError(e));
         }
     }
 
     private Result<T, RemoteDataFetcherError> convert(List<DataServiceRequestExecutor.FederatedGraphQlResponse> l) {
         List<?> value = l.stream().flatMap(result -> {
             try {
-                return Stream.of(Result.fromResult(result.toResult().getData()));
+                return Stream.of(Result.ok(result.toResult().getData()));
             } catch (ClassCastException c) {
                 log.error("Error when converting {} with error {}.", result.toResult(), c.getMessage());
-                return Stream.of(Result.fromError(new RemoteDataFetcherError(c)));
+                return Stream.of(Result.err(new RemoteDataFetcherError(c)));
             }
         }).collect(Collectors.toList());
         return this.from(value);

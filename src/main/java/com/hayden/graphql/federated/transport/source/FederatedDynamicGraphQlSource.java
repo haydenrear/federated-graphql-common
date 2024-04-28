@@ -19,9 +19,9 @@ public class FederatedDynamicGraphQlSource implements GraphQlSource {
     private GraphQL graphQl;
     private GraphQLSchema graphQLSchema;
 
-
     @Autowired
     private DgsQueryExecutor queryExecutor;
+
 
     public void reload(boolean doReload) {
         if (this.graphQLSchema == null) {

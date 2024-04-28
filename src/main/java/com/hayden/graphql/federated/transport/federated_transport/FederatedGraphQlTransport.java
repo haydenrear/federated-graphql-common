@@ -39,7 +39,6 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
-import java.util.stream.Stream;
 
 
 @RequiredArgsConstructor
@@ -55,7 +54,7 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
 
     private final Map<String, List<FederatedGraphQlServiceItemId>> transportsIndex = new ConcurrentHashMap<>();
 
-    private final FederatedItemGraphQlTransport.FetcherGraphQlTransportDelegate fetcherGraphQlTransport;
+    private final CallDataFetchersFederatedGraphQlTransport fetcherGraphQlTransport;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     private Encoder<?> jsonEncoder;
@@ -149,8 +148,8 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
         return null;
     }
 
-    private @NotNull GraphQlTransportDelegate transportDelegate(GraphQlRegistration.GraphQlTransportFederatedGraphQlRegistration g) {
-        return new GraphQlTransportDelegate(
+    private @NotNull FederatedItemGraphQlTransport.FederatedTransportsGraphQlTransportDelegate transportDelegate(GraphQlRegistration.GraphQlTransportFederatedGraphQlRegistration g) {
+        return new FederatedTransportsGraphQlTransportDelegate(
                 g.graphQlTransport(), jsonEncoder, jsonDecoder, g.id(),
                 Lists.newArrayList(
                         new UnregisterGraphQlTransportFailureAction(() -> unregister(g.id().host(), g.id())),
@@ -179,12 +178,13 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
     @SuppressWarnings({"unchecked", "rawtypes"})
     private Result<FederatedItemGraphQlTransport<GraphQlRequest>, Result.Error> getCastTransport(@NotNull GraphQlRequest request) {
         return Optional.ofNullable(this.transport(request))
-                .map(Result::fromResult)
-                .orElse(Result.fromError("Error retrieving"))
+                .map(Result::ok)
+                .orElse(Result.err("Error retrieving"))
                 .flatMap(f -> f instanceof FederatedItemGraphQlTransport t
-                        ? Result.fromResult(t)
+                        ? Result.ok(t)
                         : Result.emptyError()
-                );
+                )
+                .cast();
     }
 
     private void registerGraphQlTransport(GraphQlRegistration federatedGraphQlTransport,
