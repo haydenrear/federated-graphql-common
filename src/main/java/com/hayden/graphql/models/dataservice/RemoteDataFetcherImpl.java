@@ -46,11 +46,6 @@ public abstract class RemoteDataFetcherImpl<T> implements RemoteDataFetcher<T>, 
     }
 
     @Override
-    public T get(DataFetchingEnvironment environment) throws Exception {
-        return null;
-    }
-
-    @Override
     public Result<T, RemoteDataFetcherError> execute(DataFetchingEnvironment env) {
         return this.toResultData(
                 Flux.using(
@@ -78,14 +73,17 @@ public abstract class RemoteDataFetcherImpl<T> implements RemoteDataFetcher<T>, 
     }
 
     private Result<T, RemoteDataFetcherError> convert(List<DataServiceRequestExecutor.FederatedGraphQlResponse> l) {
-        List<?> value = l.stream().flatMap(result -> {
-            try {
-                return Stream.of(Result.ok(result.toResult().getData()));
-            } catch (ClassCastException c) {
-                log.error("Error when converting {} with error {}.", result.toResult(), c.getMessage());
-                return Stream.of(Result.err(new RemoteDataFetcherError(c)));
-            }
-        }).collect(Collectors.toList());
+        List<?> value = l.stream()
+                .flatMap(result -> {
+                    try {
+                        return Stream.of(Result.ok(result.toResult().getData()));
+                    } catch (
+                            ClassCastException c) {
+                        log.error("Error when converting {} with error {}.", result.toResult(), c.getMessage());
+                        return Stream.of(Result.err(new RemoteDataFetcherError(c)));
+                    }
+                })
+                .collect(Collectors.toList());
         return this.from(value);
     }
 

@@ -39,6 +39,9 @@ public interface RemoteDataFetcher<T> extends DataFetcher<T>, ApplicationContext
         public RemoteDataFetcherError(Throwable throwable) {
             this(Lists.newArrayList(Result.Error.fromE(throwable)));
         }
+        public RemoteDataFetcherError(String throwable) {
+            this(Lists.newArrayList(Result.Error.fromMessage(throwable)));
+        }
         public RemoteDataFetcherError(Result.Error throwable) {
             this(Lists.newArrayList(throwable));
         }

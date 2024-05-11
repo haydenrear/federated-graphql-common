@@ -8,7 +8,9 @@ import lombok.experimental.Delegate;
 import org.reactivestreams.Publisher;
 import org.springframework.graphql.client.ClientGraphQlResponse;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,13 +26,8 @@ public interface DataServiceRequestExecutor {
 
         @Override
         public Map<String, Object> toSpecification() {
-            return null;
+            return new HashMap<>();
         }
-
-        public List getErrors() {
-            return new ArrayList();
-        }
-
 
     }
 

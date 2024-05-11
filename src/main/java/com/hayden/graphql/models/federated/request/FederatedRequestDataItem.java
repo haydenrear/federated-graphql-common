@@ -25,4 +25,8 @@ public record FederatedRequestDataItem(
         Map<String, Object> extensions,
         Map<String, Object> attributes,
         Class<?> responseT,
-        ExecutionGraphQlRequest request) {  }
+        ExecutionGraphQlRequest request) {
+
+
+
+}

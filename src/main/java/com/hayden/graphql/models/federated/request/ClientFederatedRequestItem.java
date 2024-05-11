@@ -29,7 +29,7 @@ public class ClientFederatedRequestItem extends DefaultGraphQlRequest implements
 
 
     public ClientFederatedRequestItem(
-            Object document,
+            String document,
             @Nullable String operationName,
             Map<String, Object> variables,
             Map<String, Object> extensions,
@@ -37,7 +37,7 @@ public class ClientFederatedRequestItem extends DefaultGraphQlRequest implements
             FederatedRequestData requestData,
             FederatedGraphQlClientBuilderHolder.FederatedGraphQlClient.FederatedGraphQlRequestArgs client
     ) {
-        super(String.valueOf(document), operationName, variables, extensions);
+        super(document, operationName, variables, extensions);
         this.requestBody = document;
         this.requestData = requestData;
         this.client = client;
