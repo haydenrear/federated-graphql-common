@@ -1,7 +1,7 @@
 package com.hayden.graphql.federated.interceptor;
 
 import com.hayden.graphql.models.federated.request.FederatedGraphQlRequest;
-import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceItemId;
+import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceFetcherItemId;
 import graphql.Assert;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.graphql.client.ClientGraphQlRequest;
@@ -60,7 +60,7 @@ public class GraphQlFederatedInterceptor implements GraphQlClientInterceptor{
         @NotNull Flux<ClientGraphQlResponse> next(@NotNull ClientGraphQlRequest request);
 
         default Flux<ClientGraphQlResponse> next(FederatedGraphQlRequest request,
-                                                 FederatedGraphQlServiceItemId.FederatedGraphQlServiceId service) {
+                                                 FederatedGraphQlServiceFetcherItemId.FederatedGraphQlServiceFetcherId service) {
             return Mono.justOrEmpty(request.service(service))
                     .flatMapMany(this::next);
         }

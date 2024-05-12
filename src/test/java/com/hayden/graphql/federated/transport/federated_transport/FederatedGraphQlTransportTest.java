@@ -4,7 +4,7 @@ import com.hayden.graphql.federated.transport.fetcher_transport.FetcherGraphQlTr
 import com.hayden.graphql.federated.transport.source.FederatedDynamicGraphQlSource;
 import com.hayden.graphql.models.federated.request.ClientFederatedRequestItem;
 import com.hayden.graphql.models.federated.request.FederatedGraphQlRequest;
-import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceItemId;
+import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceFetcherItemId;
 import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -54,9 +54,9 @@ class FederatedGraphQlTransportTest {
 
     }
 
-    private static @NotNull Map<FederatedGraphQlServiceItemId.FederatedGraphQlServiceId, FederatedGraphQlRequest.FederatedClientGraphQlRequestItem> getRequest() {
-        var serviceId = new FederatedGraphQlServiceItemId.FederatedGraphQlServiceId(MimeType.valueOf("text/html"), "test", "test");
-        var service = new FederatedGraphQlServiceItemId(serviceId, "test", "localhost");
+    private static @NotNull Map<FederatedGraphQlServiceFetcherItemId.FederatedGraphQlServiceFetcherId, FederatedGraphQlRequest.FederatedClientGraphQlRequestItem> getRequest() {
+        var serviceId = new FederatedGraphQlServiceFetcherItemId.FederatedGraphQlServiceFetcherId(MimeType.valueOf("text/html"), "test", "test");
+        var service = new FederatedGraphQlServiceFetcherItemId(serviceId, "test", "localhost");
         return Map.of(
                 serviceId,
                 new FederatedGraphQlRequest.FederatedClientGraphQlRequestItem(serviceId, createRequestItem())

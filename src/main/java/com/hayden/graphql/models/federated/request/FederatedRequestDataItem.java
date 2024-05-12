@@ -1,10 +1,8 @@
 package com.hayden.graphql.models.federated.request;
 
-import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceItemId;
+import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceFetcherItemId;
 import graphql.schema.DataFetchingEnvironment;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.NoArgsConstructor;
 import lombok.experimental.Delegate;
 import org.springframework.graphql.ExecutionGraphQlRequest;
 import org.springframework.lang.Nullable;
@@ -15,7 +13,7 @@ import java.util.Map;
 @Builder
 public record FederatedRequestDataItem(
         String path,
-        @Delegate FederatedGraphQlServiceItemId.FederatedGraphQlServiceId federatedService,
+        @Delegate FederatedGraphQlServiceFetcherItemId.FederatedGraphQlServiceFetcherId federatedService,
         Map<String, String> queryParams,
         Object requestBody,
         DataFetchingEnvironment dataFetchingEnvironment,

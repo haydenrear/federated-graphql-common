@@ -2,13 +2,13 @@ package com.hayden.graphql.federated.transport.register;
 
 import com.hayden.graphql.federated.transport.federated_transport.FederatedItemGraphQlTransport;
 import com.hayden.graphql.models.federated.request.FederatedGraphQlRequest;
-import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceItemId;
+import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceFetcherItemId;
 import com.hayden.graphql.models.visitor.DataTemplate;
 import org.springframework.graphql.client.GraphQlTransport;
 
 public interface GraphQlRegistration {
 
-    FederatedGraphQlServiceItemId id();
+    FederatedGraphQlServiceFetcherItemId id();
 
     /**
      * Access single graphql service, through HttpGraphQlTransport, for instance.
@@ -18,7 +18,7 @@ public interface GraphQlRegistration {
      */
     record GraphQlTransportFederatedGraphQlRegistration(
             GraphQlTransport graphQlTransport,
-            FederatedGraphQlServiceItemId id,
+            FederatedGraphQlServiceFetcherItemId id,
             DataTemplate dataTemplate) implements GraphQlRegistration {}
 
     /**
@@ -28,5 +28,5 @@ public interface GraphQlRegistration {
      */
     record FederatedItemFederatedGraphQlTransportRegistration(
             FederatedItemGraphQlTransport<FederatedGraphQlRequest.FederatedClientGraphQlRequestItem> graphQlTransport,
-            FederatedGraphQlServiceItemId id) implements GraphQlRegistration { }
+            FederatedGraphQlServiceFetcherItemId id) implements GraphQlRegistration { }
 }

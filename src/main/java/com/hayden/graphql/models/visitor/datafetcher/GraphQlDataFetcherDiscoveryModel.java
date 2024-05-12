@@ -1,6 +1,6 @@
 package com.hayden.graphql.models.visitor.datafetcher;
 
-import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceItemId;
+import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceFetcherItemId;
 import com.hayden.graphql.models.visitor.*;
 import com.hayden.graphql.models.visitor.schema.GraphQlFederatedSchemaSource;
 import graphql.schema.DataFetcher;
@@ -16,10 +16,11 @@ import java.util.Collection;
  * @param fetcherSource the source code for the params fetchers so this service id can be federated.
  */
 @Slf4j
-public record GraphQlDataFetcherDiscoveryModel(FederatedGraphQlServiceItemId serviceId,
+public record GraphQlDataFetcherDiscoveryModel(
+        FederatedGraphQlServiceFetcherItemId serviceId,
 
-                                               Collection<GraphQlFederatedSchemaSource> source,
-                                               Collection<DataFetcherGraphQlSource> fetcherSource) implements VisitorModel {
+        Collection<GraphQlFederatedSchemaSource> source,
+        Collection<DataFetcherGraphQlSource> fetcherSource) implements VisitorModel {
 
 
     public record DataFetcherMetaData(Class<? extends DataFetcher<?>> fetcher, DataTemplate template)  {}

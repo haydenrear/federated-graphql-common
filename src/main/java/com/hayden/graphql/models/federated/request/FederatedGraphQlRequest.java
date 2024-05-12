@@ -1,6 +1,6 @@
 package com.hayden.graphql.models.federated.request;
 
-import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceItemId;
+import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceFetcherItemId;
 import lombok.experimental.Delegate;
 import org.springframework.graphql.client.ClientGraphQlRequest;
 
@@ -24,14 +24,15 @@ import java.util.Optional;
  *  all dependencies that are not up or were removed should be returned in the error message.
  * @param delegators
  */
-public record FederatedGraphQlRequest(Map<FederatedGraphQlServiceItemId.FederatedGraphQlServiceId, FederatedClientGraphQlRequestItem> delegators)
+public record FederatedGraphQlRequest(Map<FederatedGraphQlServiceFetcherItemId.FederatedGraphQlServiceFetcherId, FederatedClientGraphQlRequestItem> delegators)
         implements ClientGraphQlRequest {
 
-    public record FederatedClientGraphQlRequestItem(FederatedGraphQlServiceItemId.FederatedGraphQlServiceId service,
-                                                    @Delegate ClientGraphQlRequest clientGraphQlRequest)
+    public record FederatedClientGraphQlRequestItem(
+            FederatedGraphQlServiceFetcherItemId.FederatedGraphQlServiceFetcherId service,
+            @Delegate ClientGraphQlRequest clientGraphQlRequest)
             implements ClientGraphQlRequest {}
 
-    public Optional<ClientGraphQlRequest> service(FederatedGraphQlServiceItemId.FederatedGraphQlServiceId service) {
+    public Optional<ClientGraphQlRequest> service(FederatedGraphQlServiceFetcherItemId.FederatedGraphQlServiceFetcherId service) {
         return Optional.ofNullable(delegators.get(service))
                 .map(FederatedClientGraphQlRequestItem::clientGraphQlRequest);
     }

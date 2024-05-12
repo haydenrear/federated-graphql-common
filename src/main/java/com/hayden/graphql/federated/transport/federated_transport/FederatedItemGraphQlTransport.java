@@ -5,7 +5,7 @@ import com.hayden.graphql.federated.transport.fetcher_transport.FetcherGraphQlTr
 import com.hayden.graphql.federated.transport.health.GraphQlTransportFailureAction;
 import com.hayden.graphql.models.federated.request.ClientFederatedRequestItem;
 import com.hayden.graphql.models.federated.response.DefaultClientGraphQlResponse;
-import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceItemId;
+import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceFetcherItemId;
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public interface FederatedItemGraphQlTransport<R extends GraphQlRequest> extends
         return Flux.from(this.next(request));
     }
 
-    default Optional<FederatedGraphQlServiceItemId> serviceItemId() {
+    default Optional<FederatedGraphQlServiceFetcherItemId> serviceItemId() {
         return Optional.empty();
     }
 
@@ -51,7 +51,7 @@ public interface FederatedItemGraphQlTransport<R extends GraphQlRequest> extends
         private final GraphQlTransport graphQlTransport;
         private final Encoder<?> encoder;
         private final Decoder<?> decoder;
-        private final FederatedGraphQlServiceItemId serviceItemId;
+        private final FederatedGraphQlServiceFetcherItemId serviceItemId;
         private final List<GraphQlTransportFailureAction> failures;
 
         @Override
@@ -64,7 +64,7 @@ public interface FederatedItemGraphQlTransport<R extends GraphQlRequest> extends
         }
 
         @Override
-        public Optional<FederatedGraphQlServiceItemId> serviceItemId() {
+        public Optional<FederatedGraphQlServiceFetcherItemId> serviceItemId() {
             return Optional.of(this.serviceItemId);
         }
     }

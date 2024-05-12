@@ -21,7 +21,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import com.hayden.graphql.models.federated.request.FederatedGraphQlRequest;
-import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceItemId;
+import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceFetcherItemId;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.graphql.*;
@@ -49,10 +49,10 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
     protected static final boolean jackson2Present = ClassUtils.isPresent(
             "com.fasterxml.jackson.databind.ObjectMapper", AbstractGraphQlClientBuilder.class.getClassLoader());
 
-    private final Map<FederatedGraphQlServiceItemId.FederatedGraphQlServiceId, List<FederatedItemGraphQlTransport<? extends ClientGraphQlRequest>>> transports 
+    private final Map<FederatedGraphQlServiceFetcherItemId.FederatedGraphQlServiceFetcherId, List<FederatedItemGraphQlTransport<? extends ClientGraphQlRequest>>> transports
             = new ConcurrentHashMap<>();
 
-    private final Map<String, List<FederatedGraphQlServiceItemId>> transportsIndex = new ConcurrentHashMap<>();
+    private final Map<String, List<FederatedGraphQlServiceFetcherItemId>> transportsIndex = new ConcurrentHashMap<>();
 
     private final CallDataFetchersFederatedGraphQlTransport fetcherGraphQlTransport;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -113,7 +113,7 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
         };
     }
 
-    public Optional<FederatedItemGraphQlTransport<? extends GraphQlRequest>> mapTo(FederatedGraphQlServiceItemId.FederatedGraphQlServiceId serviceId) {
+    public Optional<FederatedItemGraphQlTransport<? extends GraphQlRequest>> mapTo(FederatedGraphQlServiceFetcherItemId.FederatedGraphQlServiceFetcherId serviceId) {
         return Optional.ofNullable(transports.get(serviceId))
                 .stream()
                 .flatMap(Collection::stream)
@@ -121,7 +121,7 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
                 .map(f -> f);
     }
 
-    public BiConsumer<String, FederatedGraphQlServiceItemId> register(GraphQlRegistration federatedGraphQlTransport) {
+    public BiConsumer<String, FederatedGraphQlServiceFetcherItemId> register(GraphQlRegistration federatedGraphQlTransport) {
         Optional.ofNullable(switch (federatedGraphQlTransport) {
                     case GraphQlRegistration.GraphQlTransportFederatedGraphQlRegistration g ->
                             Pair.of(transportDelegate(g), g.id());
@@ -139,7 +139,7 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     private static FederatedItemGraphQlTransport<ClientGraphQlRequest> getFederatedItemGraphQlTransport(
-            Pair<? extends FederatedItemGraphQlTransport<? extends ClientGraphQlRequest>, FederatedGraphQlServiceItemId> g
+            Pair<? extends FederatedItemGraphQlTransport<? extends ClientGraphQlRequest>, FederatedGraphQlServiceFetcherItemId> g
     ) {
         if  (g.getLeft() instanceof FederatedItemGraphQlTransport transport) {
             return transport;
@@ -163,7 +163,7 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
         return "Fail Event for %s".formatted(g.id());
     }
 
-    public String unregister(String id, FederatedGraphQlServiceItemId serviceId) {
+    public String unregister(String id, FederatedGraphQlServiceFetcherItemId serviceId) {
         this.transports.computeIfPresent(serviceId.id(), (key, prev) -> {
             prev.removeIf(f -> f.serviceItemId().filter(s -> s.equals(serviceId)).isPresent());
             return prev;
@@ -189,14 +189,14 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
 
     private void registerGraphQlTransport(GraphQlRegistration federatedGraphQlTransport,
                                           FederatedItemGraphQlTransport<ClientGraphQlRequest> transport,
-                                          FederatedGraphQlServiceItemId serviceItemId) {
+                                          FederatedGraphQlServiceFetcherItemId serviceItemId) {
         registerTransport(federatedGraphQlTransport, transport);
         registerIndex(federatedGraphQlTransport, serviceItemId);
     }
 
 
     private void registerIndex(GraphQlRegistration federatedGraphQlTransport,
-                               FederatedGraphQlServiceItemId serviceItemId) {
+                               FederatedGraphQlServiceFetcherItemId serviceItemId) {
         this.transportsIndex.compute(federatedGraphQlTransport.id().id().serviceId(), (key, prev) -> {
             if (prev == null)
                 prev = new ArrayList<>();

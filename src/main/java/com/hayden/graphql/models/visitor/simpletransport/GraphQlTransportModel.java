@@ -1,7 +1,7 @@
 package com.hayden.graphql.models.visitor.simpletransport;
 
 import com.hayden.graphql.federated.transport.http.HttpGraphQlTransportBuilder;
-import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceItemId;
+import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceFetcherItemId;
 import com.hayden.graphql.models.visitor.VisitorModel;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public record GraphQlTransportModel(
-        FederatedGraphQlServiceItemId serviceId,
+        FederatedGraphQlServiceFetcherItemId serviceId,
         HttpGraphQlTransportBuilder transportBuilder
 ) implements VisitorModel {
 }
