@@ -5,6 +5,7 @@ import com.hayden.graphql.federated.client.FederatedGraphQlClientBuilderHolder;
 import com.hayden.graphql.federated.execution.DataServiceRequestExecutor;
 import com.hayden.utilitymodule.result.Result;
 import graphql.schema.DataFetchingEnvironment;
+import jakarta.annotation.Nonnull;
 import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -89,7 +90,7 @@ public abstract class RemoteDataFetcherImpl<T> implements RemoteDataFetcher<T>, 
 
     @Override
     @Autowired
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(@Nonnull ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
 }
