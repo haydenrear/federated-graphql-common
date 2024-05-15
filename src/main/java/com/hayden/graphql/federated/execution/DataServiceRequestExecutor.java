@@ -29,6 +29,10 @@ public interface DataServiceRequestExecutor {
             return new HashMap<>();
         }
 
+        public List getErrors() {
+            return new ArrayList();
+        }
+
     }
 
     record FederatedGraphQlResponse(FederatedGraphQlResponseItem[] items) {

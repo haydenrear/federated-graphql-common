@@ -1,6 +1,7 @@
 package com.hayden.graphql.models.dataservice;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.hayden.graphql.models.federated.request.FederatedRequestData;
 import com.hayden.utilitymodule.result.Result;
 import graphql.schema.DataFetcher;
@@ -10,6 +11,7 @@ import org.springframework.context.ApplicationContextAware;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The fetcher that the data services provide to the Gateway in addition to the schema. This allows
@@ -35,15 +37,15 @@ public interface RemoteDataFetcher<T> extends DataFetcher<T>, ApplicationContext
     }
 
 
-    record RemoteDataFetcherError(List<Result.Error> errors) implements Result.AggregateError {
+    record RemoteDataFetcherError(Set<Result.Error> errors) implements Result.AggregateError {
         public RemoteDataFetcherError(Throwable throwable) {
-            this(Lists.newArrayList(Result.Error.fromE(throwable)));
+            this(Sets.newHashSet(Result.Error.fromE(throwable)));
         }
         public RemoteDataFetcherError(String throwable) {
-            this(Lists.newArrayList(Result.Error.fromMessage(throwable)));
+            this(Sets.newHashSet(Result.Error.fromMessage(throwable)));
         }
         public RemoteDataFetcherError(Result.Error throwable) {
-            this(Lists.newArrayList(throwable));
+            this(Sets.newHashSet(throwable));
         }
     }
 
