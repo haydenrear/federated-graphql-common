@@ -8,8 +8,11 @@ import com.hayden.graphql.models.GraphQlTarget;
  * @param dataFetcherSourceType
  * @param target
  */
-public record DataSource(SourceData sourceMetadata) {
-    public DataSource(GraphQlTarget targetType, String target) {
-        this(new SourceData(target, targetType));
+public record DataSource(String id, SourceData sourceMetadata, DataTemplate dataTemplate) {
+    public DataSource(String id, GraphQlTarget targetType, String target, DataTemplate dataTemplate) {
+        this(id, new SourceData(id, target, targetType), dataTemplate);
+    }
+    public DataSource(String id, GraphQlTarget targetType, String target) {
+        this(id, new SourceData(target, targetType), null);
     }
 }

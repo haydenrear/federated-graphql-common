@@ -23,8 +23,16 @@ public record GraphQlDataFetcherDiscoveryModel(
         Collection<DataFetcherGraphQlSource> fetcherSource) implements VisitorModel {
 
 
-    public record DataFetcherMetaData(Class<? extends DataFetcher<?>> fetcher, DataTemplate template)  {}
+    public record DataFetcherMetaData(Class<? extends DataFetcher<?>> fetcher, DataTemplate template)  {
+        public DataFetcherMetaData(Class<? extends DataFetcher<?>> fetcher) {
+            this(fetcher, null);
+        }
+    }
 
-    public record DataFetcherData(DataFetcher<?> fetcher, DataTemplate template)  {}
+    public record DataFetcherData(DataFetcher<?> fetcher, DataTemplate template)  {
+        public DataFetcherData(DataFetcher<?> fetcher) {
+            this(fetcher, null);
+        }
+    }
 
 }

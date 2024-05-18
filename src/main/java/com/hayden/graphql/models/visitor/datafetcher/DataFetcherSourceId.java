@@ -11,6 +11,7 @@ import org.springframework.util.MimeType;
  * @param fieldName
  */
 public record DataFetcherSourceId(
+        String dataFetcherTypeName,
         SourceType dataFetcherSourceType,
         String fieldName,
         MimeType mimeType

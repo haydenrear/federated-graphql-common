@@ -7,6 +7,6 @@ import com.hayden.graphql.models.GraphQlTarget;
  */
 public record SourceData(String packageName, String target, GraphQlTarget targetType) {
     public SourceData(String target, GraphQlTarget targetType) {
-        this(null, target, targetType);
+        this( null, target, targetType);
     }
 }
