@@ -8,7 +8,7 @@ import com.hayden.graphql.federated.transport.health.HealthEvent;
 import com.hayden.graphql.federated.transport.health.UnregisterGraphQlTransportFailureAction;
 import com.hayden.graphql.federated.transport.register.GraphQlRegistration;
 import com.hayden.graphql.models.federated.response.DefaultClientGraphQlResponse;
-import com.hayden.utilitymodule.result.Error;
+import com.hayden.utilitymodule.result.error.Error;
 import com.hayden.utilitymodule.result.Result;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
