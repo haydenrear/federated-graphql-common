@@ -8,6 +8,7 @@ import com.hayden.graphql.federated.transport.health.HealthEvent;
 import com.hayden.graphql.federated.transport.health.UnregisterGraphQlTransportFailureAction;
 import com.hayden.graphql.federated.transport.register.GraphQlRegistration;
 import com.hayden.graphql.models.federated.response.DefaultClientGraphQlResponse;
+import com.hayden.utilitymodule.result.Error;
 import com.hayden.utilitymodule.result.Result;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
@@ -176,7 +177,7 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private Result<FederatedItemGraphQlTransport<GraphQlRequest>, Result.Error> getCastTransport(@NotNull GraphQlRequest request) {
+    private Result<FederatedItemGraphQlTransport<GraphQlRequest>, Error> getCastTransport(@NotNull GraphQlRequest request) {
         return Optional.ofNullable(this.transport(request))
                 .map(Result::ok)
                 .orElse(Result.err("Error retrieving"))
