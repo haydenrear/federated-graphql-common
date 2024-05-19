@@ -3,7 +3,7 @@ package com.hayden.graphql.federated.transport.register;
 import com.hayden.graphql.federated.transport.federated_transport.FederatedItemGraphQlTransport;
 import com.hayden.graphql.models.federated.request.FederatedGraphQlRequest;
 import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceFetcherItemId;
-import com.hayden.graphql.models.visitor.DataTemplate;
+import com.hayden.graphql.models.visitor.model.DataTemplate;
 import org.springframework.graphql.client.GraphQlTransport;
 
 public interface GraphQlRegistration {

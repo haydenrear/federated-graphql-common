@@ -8,8 +8,10 @@ import org.springframework.util.MimeType;
  * @param serviceId
  * @param host
  */
-public record FederatedGraphQlServiceFetcherItemId(
-        FederatedGraphQlServiceFetcherId id, String serviceId, String host) {
-    public record FederatedGraphQlServiceFetcherId(MimeType mimeType, String uniqueFetchId, String serviceId) {
-    }
+public record FederatedGraphQlServiceFetcherItemId(FederatedGraphQlServiceFetcherId id,
+                                                   FederatedGraphQlServiceInstanceId serviceInstanceId) {
+    public record FederatedGraphQlServiceFetcherId(MimeType mimeType, String uniqueFetchId, FederatedGraphQlServiceId serviceId) { }
+    public record FederatedGraphQlServiceId(String serviceId) {}
+    public record FederatedGraphQlHost(String host) {}
+    public record FederatedGraphQlServiceInstanceId(FederatedGraphQlServiceId serviceId, FederatedGraphQlHost host) {}
 }

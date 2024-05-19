@@ -1,7 +1,6 @@
 package com.hayden.graphql.models.visitor.datafetcher;
 
-import com.hayden.graphql.models.visitor.DataSource;
-import com.hayden.graphql.models.visitor.datafetcher.DataFetcherSourceId;
+import com.hayden.graphql.models.visitor.model.DataSource;
 
 import java.util.Map;
 

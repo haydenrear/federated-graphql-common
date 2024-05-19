@@ -1,7 +1,8 @@
 package com.hayden.graphql.models.visitor.datafetcher;
 
 import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceFetcherItemId;
-import com.hayden.graphql.models.visitor.*;
+import com.hayden.graphql.models.visitor.model.DataTemplate;
+import com.hayden.graphql.models.visitor.model.VisitorModel;
 import com.hayden.graphql.models.visitor.schema.GraphQlFederatedSchemaSource;
 import graphql.schema.DataFetcher;
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +19,15 @@ import java.util.Collection;
 @Slf4j
 public record GraphQlDataFetcherDiscoveryModel(
         FederatedGraphQlServiceFetcherItemId serviceId,
-
         Collection<GraphQlFederatedSchemaSource> source,
-        Collection<DataFetcherGraphQlSource> fetcherSource) implements VisitorModel {
+        Collection<DataFetcherGraphQlSource> fetcherSource,
+        boolean invalidateCurrent
+) implements VisitorModel {
 
+    @Override
+    public FederatedGraphQlServiceFetcherItemId.FederatedGraphQlServiceInstanceId id() {
+        return serviceId.serviceInstanceId();
+    }
 
     public record DataFetcherMetaData(Class<? extends DataFetcher<?>> fetcher, DataTemplate template)  {
         public DataFetcherMetaData(Class<? extends DataFetcher<?>> fetcher) {

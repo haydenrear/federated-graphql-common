@@ -153,7 +153,7 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
         return new FederatedTransportsGraphQlTransportDelegate(
                 g.graphQlTransport(), jsonEncoder, jsonDecoder, g.id(),
                 Lists.newArrayList(
-                        new UnregisterGraphQlTransportFailureAction(() -> unregister(g.id().host(), g.id())),
+                        new UnregisterGraphQlTransportFailureAction(() -> unregister(g.id().serviceInstanceId().host().host(), g.id())),
                         new EmitFailureEventFailureAction(() -> publishFailEvent(g))
                 )
         );
@@ -169,7 +169,7 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
             prev.removeIf(f -> f.serviceItemId().filter(s -> s.equals(serviceId)).isPresent());
             return prev;
         });
-        this.transportsIndex.computeIfPresent(serviceId.id().serviceId(), (key, prev) -> {
+        this.transportsIndex.computeIfPresent(serviceId.id().serviceId().serviceId(), (key, prev) -> {
             prev.removeIf(f -> f.equals(serviceId));
             return prev;
         });
@@ -198,7 +198,7 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
 
     private void registerIndex(GraphQlRegistration federatedGraphQlTransport,
                                FederatedGraphQlServiceFetcherItemId serviceItemId) {
-        this.transportsIndex.compute(federatedGraphQlTransport.id().id().serviceId(), (key, prev) -> {
+        this.transportsIndex.compute(federatedGraphQlTransport.id().id().serviceId().serviceId(), (key, prev) -> {
             if (prev == null)
                 prev = new ArrayList<>();
 
