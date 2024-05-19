@@ -67,7 +67,7 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
                 .flatMap(to -> {
                     FederatedGraphQlRequest.FederatedClientGraphQlRequestItem value = to.getValue();
                     return getCastTransport(value)
-                            .mapError(error -> log.error("Error when retrieving graphql transport: {}.", error))
+                            .doOnError(error -> log.error("Error when retrieving graphql transport: {}.", error))
                             .map(g -> g.next(value))
                             .orElse(Flux.just(graphQlTransportErrorResponse(request)));
                 });
@@ -86,7 +86,7 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
     private Flux<GraphQlResponse> doExecute(@NotNull GraphQlRequest request) {
         return Mono.justOrEmpty(getCastTransport(request))
                 .flatMapMany(e -> Flux.just(
-                        e.mapError(error -> log.error("Error when retrieving graphql transport: {}.", error))
+                        e.doOnError(error -> log.error("Error when retrieving graphql transport: {}.", error))
                                 .map(g -> g.nextGraphQlResponse(request))
                                 .orElse(Flux.just(graphQlTransportErrorResponse(request)))
                 ))
