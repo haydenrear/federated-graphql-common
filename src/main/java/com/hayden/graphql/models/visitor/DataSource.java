@@ -12,7 +12,7 @@ public record DataSource(String id, SourceData sourceMetadata, DataTemplate data
     public DataSource(String id, GraphQlTarget targetType, String target, DataTemplate dataTemplate) {
         this(id, new SourceData(id, target, targetType), dataTemplate);
     }
-    public DataSource(String id, GraphQlTarget targetType, String target) {
-        this(id, new SourceData(target, targetType), null);
+    public DataSource(String id, String packageName, GraphQlTarget targetType, String target) {
+        this(id, new SourceData(packageName, target, targetType), null);
     }
 }
