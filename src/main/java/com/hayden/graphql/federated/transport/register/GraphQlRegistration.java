@@ -19,7 +19,14 @@ public interface GraphQlRegistration {
     record GraphQlTransportFederatedGraphQlRegistration(
             GraphQlTransport graphQlTransport,
             FederatedGraphQlServiceFetcherItemId id,
-            DataTemplate dataTemplate) implements GraphQlRegistration {}
+            DataTemplate dataTemplate) implements GraphQlRegistration {
+        public GraphQlTransportFederatedGraphQlRegistration(
+                GraphQlTransport graphQlTransport,
+                FederatedGraphQlServiceFetcherItemId id
+        ) {
+            this (graphQlTransport, id, null);
+        }
+    }
 
     /**
      * Access the DGS context, to get the data fetcher that will get the above registration eventually.
