@@ -46,9 +46,7 @@ public class FetcherGraphQlTransport implements GraphQlTransport {
                 .flatMapMany(response -> {
                     try {
                         Object data = response.getData();
-
                         List<ResponseError> errors = response.getErrors();
-
                         return Flux.from((Publisher<ExecutionResult>) data).map(executionResult ->
                                 new DefaultExecutionGraphQlResponse(response.getExecutionInput(), executionResult));
                     } catch (AssertionError ex) {

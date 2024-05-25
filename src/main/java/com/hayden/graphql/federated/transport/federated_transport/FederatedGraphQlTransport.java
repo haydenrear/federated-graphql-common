@@ -176,7 +176,7 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
         return id;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     private Result<FederatedItemGraphQlTransport<GraphQlRequest>, Error> getCastTransport(@NotNull GraphQlRequest request) {
         return Optional.ofNullable(this.transport(request))
                 .map(Result::ok)

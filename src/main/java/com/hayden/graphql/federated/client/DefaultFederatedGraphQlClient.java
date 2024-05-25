@@ -1,6 +1,8 @@
 package com.hayden.graphql.federated.client;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,21 +28,72 @@ import org.springframework.util.Assert;
 public class DefaultFederatedGraphQlClient {
 
     private final GraphQlFederatedInterceptor.FederatedSubscriptionChain executeSubscriptionChain;
+    private final ObjectMapper om;
 
 
-    DefaultFederatedGraphQlClient(GraphQlFederatedInterceptor.FederatedSubscriptionChain executeSubscriptionChain) {
+    DefaultFederatedGraphQlClient(GraphQlFederatedInterceptor.FederatedSubscriptionChain executeSubscriptionChain, ObjectMapper om) {
         Assert.notNull(executeSubscriptionChain, "GraphQlClientInterceptor.SubscriptionChain is required");
+        this.om = om;
         this.executeSubscriptionChain = executeSubscriptionChain;
     }
 
     public FederatedRequestSpec federatedDocuments(FederatedRequestData requestData,
                                                    FederatedGraphQlClientBuilderHolder.FederatedGraphQlClient.FederatedGraphQlRequestArgs federatedGraphQlClient) {
-        return new FederatedRequestSpec(requestData, federatedGraphQlClient, new ObjectMapper());
+        if (Arrays.stream(requestData.data()).anyMatch(f -> Objects.isNull(f.federatedService()))) {
+            Assert.isTrue(Arrays.stream(requestData.data()).noneMatch(f -> Objects.nonNull(f.federatedService())),
+                    "Federated request data invalid.");
+            return new StitchingRequestSpect(requestData, federatedGraphQlClient, this.om);
+        }
+
+        return new FetcherRequestSpec(requestData, federatedGraphQlClient, this.om);
+    }
+
+    public interface FederatedRequestSpec {
+        Flux<ClientGraphQlResponse> execute();
+    }
+
+    @RequiredArgsConstructor
+    @Slf4j
+    public final class FetcherRequestSpec implements FederatedRequestSpec {
+
+        private final FederatedRequestData requestData;
+        private final FederatedGraphQlClientBuilderHolder.FederatedGraphQlClient.FederatedGraphQlRequestArgs client;
+        private final ObjectMapper om;
+
+
+        public Flux<ClientGraphQlResponse> execute() {
+            return initRequest()
+                    .flatMap(request -> executeSubscriptionChain.next(request)
+                            .onErrorResume(
+                                    ex -> !(ex instanceof GraphQlClientException),
+                                    ex -> Mono.error(new GraphQlTransportException(ex, request))));
+        }
+
+        Flux<ClientGraphQlRequest> initRequest() {
+            return Flux.fromArray(this.requestData.data())
+                    .flatMap(document -> {
+                        try {
+                            return Mono.just(new ClientFederatedRequestItem(
+                                    om.writeValueAsString(document.requestBody()),
+                                    document.operationName(),
+                                    document.variables(),
+                                    document.extensions(),
+                                    document.attributes(),
+                                    requestData, client
+                            ));
+                        } catch (
+                                JsonProcessingException e) {
+                            return Mono.error(e);
+                        }
+                    });
+        }
+
     }
 
 
     @RequiredArgsConstructor
-    public final class FederatedRequestSpec  {
+    @Slf4j
+    public final class StitchingRequestSpect implements FederatedRequestSpec  {
 
         private final FederatedRequestData requestData;
         private final FederatedGraphQlClientBuilderHolder.FederatedGraphQlClient.FederatedGraphQlRequestArgs client;
@@ -55,23 +108,27 @@ public class DefaultFederatedGraphQlClient {
                             ex -> Mono.error(new GraphQlTransportException(ex, request))));
         }
 
-        private Mono<FederatedGraphQlRequest> initRequest() {
+        Mono<ClientGraphQlRequest> initRequest() {
             return Flux.fromArray(this.requestData.data())
                     .flatMap(document -> {
-                        try {
-                            return Flux.just(Pair.of(document.federatedService(), new ClientFederatedRequestItem(
-                                    om.writeValueAsString(document.requestBody()),
-                                    document.operationName(),
-                                    document.variables(),
-                                    document.extensions(),
-                                    document.attributes(),
-                                    requestData, client
-                            )));
-                        } catch (JsonProcessingException e) {
-                            return Flux.error(e);
-                        }
+                        return Mono.justOrEmpty(document.federatedService())
+                                .flatMap(f -> {
+                                    try {
+                                        return Mono.just(Pair.of(document.federatedService(), new ClientFederatedRequestItem(
+                                                om.writeValueAsString(document.requestBody()),
+                                                document.operationName(),
+                                                document.variables(),
+                                                document.extensions(),
+                                                document.attributes(),
+                                                requestData, client
+                                        )));
+                                    } catch (JsonProcessingException e) {
+                                        return Mono.error(e);
+                                    }
+                                })
+                                .flux();
                     })
-//                    .doOnError(t -> log.error("{}", t.getMessage()))
+                    .doOnError(t -> log.error("{}", t.getMessage()))
                     .map(p -> Map.entry(p.getKey(), new FederatedGraphQlRequest.FederatedClientGraphQlRequestItem(p.getKey(), p.getRight())))
                     .collectMap(Map.Entry::getKey, Map.Entry::getValue)
                     .map(FederatedGraphQlRequest::new);

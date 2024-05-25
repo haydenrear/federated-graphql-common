@@ -1,5 +1,6 @@
 package com.hayden.graphql.federated.client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hayden.graphql.federated.execution.DataServiceRequestExecutor;
 import com.hayden.graphql.federated.transport.federated_transport.FederatedGraphQlTransportResult;
 import com.hayden.graphql.federated.interceptor.GraphQlFederatedInterceptor;
@@ -85,7 +86,7 @@ public class FederatedGraphQlClientBuilderHolder extends AbstractGraphQlClientBu
 			this.jsonDecoder = (this.jsonDecoder == null ? DefaultJackson2Codecs.decoder() : this.jsonDecoder);
 		}
 
-		return new DefaultFederatedGraphQlClient(createExecuteSubscriptionChain(transport));
+		return new DefaultFederatedGraphQlClient(createExecuteSubscriptionChain(transport), new ObjectMapper());
 	}
 
 	private GraphQlFederatedInterceptor.FederatedSubscriptionChain createExecuteSubscriptionChain(FederatedGraphQlTransport transport) {

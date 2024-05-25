@@ -12,7 +12,7 @@ public interface FederatedExecutionGraphQlService extends ExecutionGraphQlServic
 
     Mono<ExecutionGraphQlResponse> execute(ClientRequest clientRequest);
 
-    Mono<ExecutionGraphQlResponse> execute(@NotNull ExecutionGraphQlRequest request, boolean parsed);
+    Mono<ExecutionGraphQlResponse> execute(ExecutionGraphQlRequest request, boolean parsed);
 
     FederatedGraphQlClientBuilderHolder.FederatedGraphQlClient federatedClient();
 

@@ -47,7 +47,7 @@ public class ClientFederatedRequestItem extends DefaultGraphQlRequest implements
 
 
     @Override
-    public Map<String, Object> getAttributes() {
+    public @NotNull Map<String, Object> getAttributes() {
         return this.attributes;
     }
 
