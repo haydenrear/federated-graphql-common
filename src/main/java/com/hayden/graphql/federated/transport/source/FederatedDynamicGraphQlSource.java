@@ -5,6 +5,7 @@ import com.netflix.graphql.dgs.internal.DefaultDgsQueryExecutor;
 import graphql.GraphQL;
 import graphql.schema.GraphQLSchema;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ public class FederatedDynamicGraphQlSource implements GraphQlSource {
     private GraphQLSchema graphQLSchema;
 
     @Autowired
+    @Delegate
     private DgsQueryExecutor queryExecutor;
 
 

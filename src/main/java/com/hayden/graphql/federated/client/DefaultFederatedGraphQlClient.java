@@ -25,6 +25,7 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 1.0.0
  */
+@Slf4j
 public class DefaultFederatedGraphQlClient {
 
     private final GraphQlFederatedInterceptor.FederatedSubscriptionChain executeSubscriptionChain;
@@ -53,7 +54,6 @@ public class DefaultFederatedGraphQlClient {
     }
 
     @RequiredArgsConstructor
-    @Slf4j
     public final class FetcherRequestSpec implements FederatedRequestSpec {
 
         private final FederatedRequestData requestData;
@@ -92,7 +92,6 @@ public class DefaultFederatedGraphQlClient {
 
 
     @RequiredArgsConstructor
-    @Slf4j
     public final class StitchingRequestSpect implements FederatedRequestSpec  {
 
         private final FederatedRequestData requestData;
