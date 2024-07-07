@@ -12,7 +12,6 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.reactivestreams.Publisher;
 import org.springframework.core.codec.Decoder;
@@ -60,7 +59,7 @@ public class FederatedGraphQlClientBuilderHolder extends AbstractGraphQlClientBu
 
 	@Override
 	public GraphQlClient build() {
-		throw new NotImplementedException("Use buildFederatedClient to build %s.".formatted(this.getClass().getSimpleName()));
+		throw new RuntimeException("Use buildFederatedClient to build %s.".formatted(this.getClass().getSimpleName()));
 	}
 
 	public FederatedGraphQlClient buildFederatedClient(FederatedGraphQlTransportResult transport) {

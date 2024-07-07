@@ -8,6 +8,7 @@ import com.hayden.graphql.federated.transport.health.EmitFailureEventFailureActi
 import com.hayden.graphql.federated.transport.health.HealthEvent;
 import com.hayden.graphql.federated.transport.health.UnregisterGraphQlTransportFailureAction;
 import com.hayden.graphql.federated.transport.register.GraphQlRegistration;
+import com.hayden.graphql.models.federated.request.ClientFederatedRequestItem;
 import com.hayden.graphql.models.federated.response.DefaultClientGraphQlResponse;
 import com.hayden.utilitymodule.MapFunctions;
 import com.hayden.utilitymodule.result.error.Error;
@@ -28,7 +29,6 @@ import org.springframework.core.codec.Encoder;
 import com.hayden.graphql.models.federated.request.FederatedGraphQlRequest;
 import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceFetcherItemId;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.graphql.*;
 import org.springframework.graphql.client.AbstractGraphQlClientBuilder;
 import org.springframework.graphql.client.ClientGraphQlRequest;
@@ -151,7 +151,7 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
                             Pair.of(transportDelegate(g), g.id());
                     case GraphQlRegistration.FederatedItemFederatedGraphQlTransportRegistration g ->
                             Pair.of(g.graphQlTransport(), g.id());
-                    default -> throw new NotImplementedException("%s did not exist.".formatted(federatedGraphQlTransport.getClass().getSimpleName()));
+                    default -> throw new RuntimeException("%s did not exist.".formatted(federatedGraphQlTransport.getClass().getSimpleName()));
                 })
                 .ifPresent(g -> {
                     if (!this.transports.containsKey(g.getRight().id())) {
@@ -207,11 +207,7 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
         return Optional.ofNullable(this.transport(request))
                 .map(Result::ok)
                 .orElse(Result.err("Error retrieving"))
-                .flatMap(f -> f instanceof FederatedItemGraphQlTransport<?> t
-                        ? Result.ok(t)
-                        : Result.emptyError()
-                )
-                .cast();
+                .map(e -> (FederatedItemGraphQlTransport<GraphQlRequest>) e, () -> new Error.StandardError("No FederatedItemGraphQlTransport found for " + request));
     }
 
     private void registerGraphQlTransport(GraphQlRegistration federatedGraphQlTransport,
@@ -261,23 +257,58 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
     }
 
     private ClientGraphQlResponse graphQlTransportErrorResponse(@NotNull ClientGraphQlRequest request) {
-        return new DefaultClientGraphQlResponse(
-                request,
-                new DefaultExecutionGraphQlResponse(
-                        ExecutionInput.newExecutionInput()
-                                .query(request.getDocument())
-                                .operationName(request.getOperationName())
-                                .graphQLContext(request.toMap())
-                                .extensions(request.getExtensions())
-                                .variables(request.getVariables())
-                                .build(),
-                        ExecutionResult.newExecutionResult()
-                                .addError(new GraphQlTransportError("Error retrieving GraphQl Transport. Please try again."))
-                                .build()
-                ),
-                jsonEncoder,
-                jsonDecoder
-        );
+        return switch(request) {
+            case ClientFederatedRequestItem i ->
+                    new DefaultClientGraphQlResponse(
+                             request,
+                             new DefaultExecutionGraphQlResponse(
+                                     ExecutionInput.newExecutionInput()
+                                             .query(request.getDocument())
+                                             .operationName(request.getOperationName())
+                                             .graphQLContext(request.toMap())
+                                             .extensions(request.getExtensions())
+                                             .variables(request.getVariables())
+                                             .build(),
+                                     ExecutionResult.newExecutionResult()
+                                             .addError(new GraphQlTransportError("Error retrieving GraphQl Transport. Please try again."))
+                                             .build()
+                             ),
+                             jsonEncoder,
+                             jsonDecoder
+                     );
+            case FederatedGraphQlRequest.FederatedClientGraphQlRequestItem i ->
+                    new DefaultClientGraphQlResponse(
+                            request,
+                            new DefaultExecutionGraphQlResponse(
+                                    ExecutionInput.newExecutionInput()
+                                            .query(request.getDocument())
+                                            .operationName(request.getOperationName())
+                                            .graphQLContext(request.toMap())
+                                            .extensions(request.getExtensions())
+                                            .variables(request.getVariables())
+                                            .build(),
+                                    ExecutionResult.newExecutionResult()
+                                            .addError(new GraphQlTransportError("Error retrieving GraphQl Transport. Please try again."))
+                                            .build()
+                            ),
+                            jsonEncoder,
+                            jsonDecoder
+                    );
+            case FederatedGraphQlRequest i -> new DefaultClientGraphQlResponse(
+                    request,
+                    new DefaultExecutionGraphQlResponse(
+                            ExecutionInput.newExecutionInput()
+                                    .query(i.getDocument())
+                                    .build(),
+                            ExecutionResult.newExecutionResult()
+                                    .addError(new GraphQlTransportError("Error retrieving GraphQl Transport. Please try again."))
+                                    .build()
+                    ),
+                    jsonEncoder,
+                    jsonDecoder
+            );
+            default -> throw new RuntimeException("%s did not exist.".formatted(request));
+        };
     }
 
 }

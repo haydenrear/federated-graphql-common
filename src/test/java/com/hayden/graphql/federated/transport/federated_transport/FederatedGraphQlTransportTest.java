@@ -1,5 +1,7 @@
 package com.hayden.graphql.federated.transport.federated_transport;
 
+import com.hayden.graphql.federated.FederatedGraphQlSourceProvider;
+import com.hayden.graphql.federated.config.FederatedGraphQlProperties;
 import com.hayden.graphql.federated.transport.fetcher_transport.FetcherGraphQlTransport;
 import com.hayden.graphql.federated.transport.source.FederatedDynamicGraphQlSource;
 import com.hayden.graphql.models.federated.request.ClientFederatedRequestItem;
@@ -11,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.ApplicationEventPublisher;
@@ -24,8 +27,10 @@ import java.util.Map;
 @SpringBootTest(classes = {
         FederatedDynamicGraphQlSource.class, FederatedGraphQlTransport.class,
         FederatedItemGraphQlTransport.CallDataFetchersFederatedGraphQlTransport.class,
-        ApplicationEventPublisher.class, FetcherGraphQlTransport.class
+        ApplicationEventPublisher.class, FetcherGraphQlTransport.class,
+        FederatedGraphQlSourceProvider.class
 })
+@EnableConfigurationProperties(FederatedGraphQlProperties.class)
 @ExtendWith(SpringExtension.class)
 @ImportAutoConfiguration(DgsAutoConfiguration.class)
 class FederatedGraphQlTransportTest {
@@ -55,11 +60,14 @@ class FederatedGraphQlTransportTest {
     }
 
     private static @NotNull Map<FederatedGraphQlServiceFetcherItemId.FederatedGraphQlServiceFetcherId, FederatedGraphQlRequest.FederatedClientGraphQlRequestItem> getRequest() {
-        var serviceId = new FederatedGraphQlServiceFetcherItemId.FederatedGraphQlServiceFetcherId(MimeType.valueOf("text/html"), "test", "test");
-        var service = new FederatedGraphQlServiceFetcherItemId(serviceId, "test", "localhost");
+        FederatedGraphQlServiceFetcherItemId.FederatedGraphQlServiceId serviceId = new FederatedGraphQlServiceFetcherItemId.FederatedGraphQlServiceId("test");
+        var serviceFetcherId = new FederatedGraphQlServiceFetcherItemId.FederatedGraphQlServiceFetcherId(MimeType.valueOf("text/html"), "test", serviceId);
+        FederatedGraphQlServiceFetcherItemId.FederatedGraphQlHost host = new FederatedGraphQlServiceFetcherItemId.FederatedGraphQlHost("localhost");
+        FederatedGraphQlServiceFetcherItemId.FederatedGraphQlServiceInstanceId serviceInstanceId = new FederatedGraphQlServiceFetcherItemId.FederatedGraphQlServiceInstanceId(serviceId, host);
+        var service = new FederatedGraphQlServiceFetcherItemId(serviceFetcherId, serviceInstanceId);
         return Map.of(
-                serviceId,
-                new FederatedGraphQlRequest.FederatedClientGraphQlRequestItem(serviceId, createRequestItem())
+                serviceFetcherId,
+                new FederatedGraphQlRequest.FederatedClientGraphQlRequestItem(serviceFetcherId, createRequestItem())
         );
     }
 

@@ -4,7 +4,6 @@ import com.hayden.graphql.models.client.ClientResponse;
 import com.hayden.utilitymodule.MapFunctions;
 import graphql.ExecutionResult;
 import graphql.GraphQLError;
-import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,7 +22,7 @@ public record FederatedExecutionResult(ExecutionResult[] delegators) implements 
 
     @Override
     public <T> T getData() {
-        throw new NotImplementedException("not implemented");
+        throw new RuntimeException("not implemented");
     }
 
     public ClientResponse getFederatedData() {

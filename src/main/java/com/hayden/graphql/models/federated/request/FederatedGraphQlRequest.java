@@ -48,7 +48,7 @@ public record FederatedGraphQlRequest(Map<FederatedGraphQlServiceFetcherItemId.F
 
     @Override
     public String getDocument() {
-        throw new UnsupportedOperationException(logNotSupported());
+        return "";
     }
 
     @Override
