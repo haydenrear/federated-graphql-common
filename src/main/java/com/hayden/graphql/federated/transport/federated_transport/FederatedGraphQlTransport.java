@@ -11,9 +11,8 @@ import com.hayden.graphql.federated.transport.register.GraphQlRegistration;
 import com.hayden.graphql.models.federated.request.ClientFederatedRequestItem;
 import com.hayden.graphql.models.federated.response.DefaultClientGraphQlResponse;
 import com.hayden.utilitymodule.MapFunctions;
-import com.hayden.utilitymodule.result.error.Error;
+import com.hayden.utilitymodule.result.error.ErrorCollect;
 import com.hayden.utilitymodule.result.Result;
-import graphql.ErrorClassification;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQLError;
@@ -33,8 +32,6 @@ import org.springframework.graphql.*;
 import org.springframework.graphql.client.AbstractGraphQlClientBuilder;
 import org.springframework.graphql.client.ClientGraphQlRequest;
 import org.springframework.graphql.client.ClientGraphQlResponse;
-import org.springframework.graphql.server.WebGraphQlRequest;
-import org.springframework.graphql.server.WebGraphQlResponse;
 import org.springframework.graphql.support.DefaultExecutionGraphQlResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ClassUtils;
@@ -76,7 +73,7 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
                     return getCastTransport(value)
                             .doOnError(error -> log.error("Error when retrieving graphql transport: {}.", error))
                             .map(g -> g.next(value))
-                            .orElse(Flux.just(graphQlTransportErrorResponse(request)));
+                            .orElseRes(Flux.just(graphQlTransportErrorResponse(request)));
                 });
     }
 
@@ -111,7 +108,7 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
                 .flatMapMany(e -> Flux.just(
                         e.doOnError(error -> log.error("Error when retrieving graphql transport: {}.", error))
                                 .map(g -> g.nextGraphQlResponse(request))
-                                .orElse(Flux.just(graphQlTransportErrorResponse(request)))
+                                .orElseRes(Flux.just(graphQlTransportErrorResponse(request)))
                 ))
                 // in the case where a service is failing, it will be removed.
                 .retryWhen(Retry.backoff(5, Duration.ofMillis(500)))
@@ -203,11 +200,11 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
         return id;
     }
 
-    private Result<FederatedItemGraphQlTransport<GraphQlRequest>, Error> getCastTransport(@NotNull GraphQlRequest request) {
+    private Result<FederatedItemGraphQlTransport<GraphQlRequest>, ErrorCollect> getCastTransport(@NotNull GraphQlRequest request) {
         return Optional.ofNullable(this.transport(request))
                 .map(Result::ok)
                 .orElse(Result.err("Error retrieving"))
-                .map(e -> (FederatedItemGraphQlTransport<GraphQlRequest>) e, () -> new Error.StandardError("No FederatedItemGraphQlTransport found for " + request));
+                .map(e -> (FederatedItemGraphQlTransport<GraphQlRequest>) e, () -> new ErrorCollect.StandardError("No FederatedItemGraphQlTransport found for " + request));
     }
 
     private void registerGraphQlTransport(GraphQlRegistration federatedGraphQlTransport,
