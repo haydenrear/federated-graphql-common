@@ -77,7 +77,7 @@ public abstract class RemoteDataFetcherImpl<T> implements RemoteDataFetcher<T>, 
         List<?> value = l.stream()
                 .flatMap(result -> {
                     try {
-                        return Stream.of(Result.ok(result.toResult().getData()));
+                        return Stream.of(Result.ok(result.toResult().<T>getData()));
                     } catch (
                             ClassCastException c) {
                         log.error("Error when converting {} with error {}.", result.toResult(), c.getMessage());

@@ -200,11 +200,12 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
         return id;
     }
 
-    private Result<FederatedItemGraphQlTransport<GraphQlRequest>, ErrorCollect> getCastTransport(@NotNull GraphQlRequest request) {
+    private Result<FederatedItemGraphQlTransport<GraphQlRequest>, ErrorCollect.StandardError> getCastTransport(@NotNull GraphQlRequest request) {
         return Optional.ofNullable(this.transport(request))
-                .map(Result::ok)
-                .orElse(Result.err("Error retrieving"))
-                .map(e -> (FederatedItemGraphQlTransport<GraphQlRequest>) e, () -> new ErrorCollect.StandardError("No FederatedItemGraphQlTransport found for " + request));
+                .map(f -> (FederatedItemGraphQlTransport<GraphQlRequest>) f)
+                .map(Result::<FederatedItemGraphQlTransport<GraphQlRequest>, ErrorCollect.StandardError>ok)
+                .orElse(Result.err(new ErrorCollect.StandardError("Failed")))
+                .map(e -> e, () -> new ErrorCollect.StandardError("No FederatedItemGraphQlTransport found for " + request));
     }
 
     private void registerGraphQlTransport(GraphQlRegistration federatedGraphQlTransport,
