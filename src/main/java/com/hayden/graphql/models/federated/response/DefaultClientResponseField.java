@@ -42,12 +42,6 @@ final class DefaultClientResponseField implements ClientResponseField {
 
 
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public boolean hasValue() {
-        return (this.field.getValue() != null);
-    }
-
     @Override
     public String getPath() {
         return this.field.getPath();
@@ -63,11 +57,6 @@ final class DefaultClientResponseField implements ClientResponseField {
         return this.field.getValue();
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public ResponseError getError() {
-        return this.field.getError();
-    }
 
     @Override
     public List<ResponseError> getErrors() {

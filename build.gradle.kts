@@ -1,6 +1,6 @@
 plugins {
     id("com.hayden.test-jar")
-    id("com.hayden.graphql")
+    id("com.hayden.dgs-graphql")
     id("com.hayden.no-main-class")
 }
 
