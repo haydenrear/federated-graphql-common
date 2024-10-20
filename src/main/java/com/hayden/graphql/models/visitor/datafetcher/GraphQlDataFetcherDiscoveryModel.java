@@ -7,7 +7,9 @@ import com.hayden.graphql.models.visitor.schema.GraphQlFederatedSchemaSource;
 import graphql.schema.DataFetcher;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * TODO: create a request for delete of schema from TypeRegistry.
@@ -35,9 +37,16 @@ public record GraphQlDataFetcherDiscoveryModel(
         }
     }
 
-    public record DataFetcherData(DataFetcher<?> fetcher, DataTemplate template)  {
+    public record DataFetcherData(DataFetcher<?> fetcher, DataTemplate template, List<DataFetcherAssignment> field)  {
+
+        public record DataFetcherAssignment(String parentType, String field) {}
+
+        public DataFetcherData(DataFetcher<?> fetcher, DataTemplate dataTemplate) {
+            this(fetcher, dataTemplate, new ArrayList<>());
+        }
+
         public DataFetcherData(DataFetcher<?> fetcher) {
-            this(fetcher, null);
+            this(fetcher, null, new ArrayList<>());
         }
     }
 

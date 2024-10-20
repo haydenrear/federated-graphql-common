@@ -24,6 +24,8 @@ public interface RemoteDataFetcher<T> extends DataFetcher<T>, ApplicationContext
 
     Result<T, RemoteDataFetcherError> execute(DataFetchingEnvironment env);
 
+    Result<T, RemoteDataFetcherError> execute(FederatedRequestData env);
+
     FederatedRequestData toRequestData(DataFetchingEnvironment env);
 
     <U> Result<T, RemoteDataFetcherError> from(List<U> fromValue);

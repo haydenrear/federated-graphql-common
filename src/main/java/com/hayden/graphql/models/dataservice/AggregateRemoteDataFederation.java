@@ -8,9 +8,9 @@ import reactor.core.publisher.Flux;
 
 import java.util.Collection;
 
-public interface AggregateRemoteDataFederation {
+public abstract class AggregateRemoteDataFederation extends RemoteDataFederation<ClientGraphQlResponse> {
 
-    Collection<RemoteDataFederation> dataFetchers();
+    abstract Collection<RemoteDataFederation<?>> dataFederation();
 
     /**
      * Must do logging, print...
@@ -18,11 +18,11 @@ public interface AggregateRemoteDataFederation {
      * @param fetched
      * @return
      */
-    Publisher<ClientGraphQlResponse> aggregate(Publisher<ClientGraphQlResponse> fetched);
+    abstract Publisher<ClientGraphQlResponse> aggregate(Publisher<?> fetched);
 
-    default Flux<ClientGraphQlResponse> fetch(FederatedRequestData environment,
-                                              FederatedGraphQlClientBuilderHolder.FederatedGraphQlClient.FederatedGraphQlRequestArgs federatedGraphQlClient) {
-        return Flux.fromIterable(this.dataFetchers())
+    Flux<?> fetch(FederatedRequestData environment,
+                                      FederatedGraphQlClientBuilderHolder.FederatedGraphQlClient.FederatedGraphQlRequestArgs federatedGraphQlClient) {
+        return Flux.fromIterable(this.dataFederation())
                 .flatMap(r -> {
                     try {
                         return Flux.from(r.get(environment, federatedGraphQlClient));
@@ -33,8 +33,8 @@ public interface AggregateRemoteDataFederation {
     }
 
 
-    default Publisher<ClientGraphQlResponse> get(FederatedRequestData environment,
-                                                 FederatedGraphQlClientBuilderHolder.FederatedGraphQlClient.FederatedGraphQlRequestArgs federatedGraphQlClient) {
+    Publisher<ClientGraphQlResponse> get(FederatedRequestData environment,
+                                         FederatedGraphQlClientBuilderHolder.FederatedGraphQlClient.FederatedGraphQlRequestArgs federatedGraphQlClient) {
         return aggregate(fetch(environment, federatedGraphQlClient));
     }
 }

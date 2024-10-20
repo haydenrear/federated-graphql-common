@@ -3,6 +3,7 @@ package com.hayden.graphql.models.dataservice;
 import com.hayden.graphql.federated.FederatedExecutionGraphQlService;
 import com.hayden.graphql.federated.client.FederatedGraphQlClientBuilderHolder;
 import com.hayden.graphql.federated.execution.DataServiceRequestExecutor;
+import com.hayden.graphql.models.federated.request.FederatedRequestData;
 import com.hayden.utilitymodule.result.Result;
 import graphql.schema.DataFetchingEnvironment;
 import jakarta.annotation.Nonnull;
@@ -48,10 +49,15 @@ public abstract class RemoteDataFetcherImpl<T> implements RemoteDataFetcher<T>, 
 
     @Override
     public Result<T, RemoteDataFetcherError> execute(DataFetchingEnvironment env) {
+        return this.execute(toRequestData(env));
+    }
+
+    @Override
+    public Result<T, RemoteDataFetcherError> execute(FederatedRequestData requestData) {
         return this.toResultData(
                 Flux.using(
                                 () -> executionService.federatedClient(),
-                                federatedClient -> federatedClient.request(toRequestData(env)),
+                                federatedClient -> federatedClient.request(requestData),
                                 FederatedGraphQlClientBuilderHolder.FederatedGraphQlClient::close
                         )
                         .log()

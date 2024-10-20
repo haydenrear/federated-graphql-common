@@ -13,6 +13,7 @@ import org.springframework.util.MimeType;
 public record DataFetcherSourceId(
         String dataFetcherTypeName,
         SourceType dataFetcherSourceType,
+        String dataFetchedClassName,
         String fieldName,
         MimeType mimeType
 ) {
