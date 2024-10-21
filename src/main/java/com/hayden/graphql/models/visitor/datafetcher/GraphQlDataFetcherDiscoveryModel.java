@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * TODO: create a request for delete of schema from TypeRegistry.
  * @param serviceId the serviceId of this graph-ql service. This will be the same for deploying multiple services of
  *                  the same type.
  * @param source the GraphQlSource schema provided.

@@ -8,5 +8,4 @@ import lombok.extern.slf4j.Slf4j;
 public record DeleteSchemaApiVisitorModel(String toDelete,
                                           FederatedGraphQlServiceFetcherItemId fetcherId,
                                           boolean invalidateCurrent,
-                                          FederatedGraphQlServiceFetcherItemId.FederatedGraphQlServiceInstanceId id) implements VisitorModel {
-}
+                                          FederatedGraphQlServiceFetcherItemId.FederatedGraphQlServiceInstanceId id) implements VisitorModel { }
