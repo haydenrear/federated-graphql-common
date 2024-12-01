@@ -30,6 +30,26 @@ public interface RemoteDataFetcher<T> extends DataFetcher<T>, ApplicationContext
 
     <U> Result<T, RemoteDataFetcherError> from(List<U> fromValue);
 
+    record RequestTemplate(String document, GraphQlRequestType graphQlRequestType) {
+        public enum GraphQlRequestType {
+            QUERY, MUTATION, SUBSCRIPTION
+        }
+
+        public static RequestTemplate mutationOf(String document) {
+            return new RequestTemplate(document, GraphQlRequestType.MUTATION);
+        }
+
+        public static RequestTemplate queryOf(String document) {
+            return new RequestTemplate(document, GraphQlRequestType.QUERY);
+        }
+
+        public static RequestTemplate subscriptionOf(String document) {
+            return new RequestTemplate(document, GraphQlRequestType.SUBSCRIPTION);
+        }
+    }
+
+    List<RequestTemplate> requestTemplates();
+
     /**
      * Wire the context so that beans are available.
      * @param beanFactory
