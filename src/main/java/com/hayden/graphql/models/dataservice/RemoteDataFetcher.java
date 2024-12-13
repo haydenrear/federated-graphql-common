@@ -2,7 +2,7 @@ package com.hayden.graphql.models.dataservice;
 
 import com.google.common.collect.Sets;
 import com.hayden.graphql.models.federated.request.FederatedRequestData;
-import com.hayden.utilitymodule.result.error.AggregateError;
+import com.hayden.utilitymodule.result.agg.AggregateError;
 import com.hayden.utilitymodule.result.error.ErrorCollect;
 import com.hayden.utilitymodule.result.Result;
 import graphql.schema.DataFetcher;
@@ -59,7 +59,7 @@ public interface RemoteDataFetcher<T> extends DataFetcher<T>, ApplicationContext
     }
 
 
-    record RemoteDataFetcherError(Set<ErrorCollect> errors) implements AggregateError {
+    record RemoteDataFetcherError(Set<ErrorCollect> errors) implements AggregateError.StdAggregateError {
         public RemoteDataFetcherError(Throwable throwable) {
             this(Sets.newHashSet(ErrorCollect.fromE(throwable)));
         }
