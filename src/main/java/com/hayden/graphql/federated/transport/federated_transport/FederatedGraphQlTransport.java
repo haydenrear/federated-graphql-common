@@ -11,7 +11,7 @@ import com.hayden.graphql.federated.transport.register.GraphQlRegistration;
 import com.hayden.graphql.models.federated.request.ClientFederatedRequestItem;
 import com.hayden.graphql.models.federated.response.DefaultClientGraphQlResponse;
 import com.hayden.utilitymodule.MapFunctions;
-import com.hayden.utilitymodule.result.error.ErrorCollect;
+import com.hayden.utilitymodule.result.error.SingleError;
 import com.hayden.utilitymodule.result.Result;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
@@ -73,6 +73,7 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
                     return getCastTransport(value)
                             .doOnError(error -> log.error("Error when retrieving graphql transport: {}.", error))
                             .map(g -> g.next(value))
+                            .one()
                             .orElseRes(Flux.just(graphQlTransportErrorResponse(request)));
                 });
     }
@@ -108,6 +109,7 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
                 .flatMapMany(e -> Flux.just(
                         e.doOnError(error -> log.error("Error when retrieving graphql transport: {}.", error))
                                 .map(g -> g.nextGraphQlResponse(request))
+                                .one()
                                 .orElseRes(Flux.just(graphQlTransportErrorResponse(request)))
                 ))
                 // in the case where a service is failing, it will be removed.
@@ -200,12 +202,12 @@ public class FederatedGraphQlTransport implements FederatedItemGraphQlTransport<
         return id;
     }
 
-    private Result<FederatedItemGraphQlTransport<GraphQlRequest>, ErrorCollect.StandardError> getCastTransport(@NotNull GraphQlRequest request) {
+    private Result<FederatedItemGraphQlTransport<GraphQlRequest>, SingleError.StandardError> getCastTransport(@NotNull GraphQlRequest request) {
         return Optional.ofNullable(this.transport(request))
                 .map(f -> (FederatedItemGraphQlTransport<GraphQlRequest>) f)
-                .map(Result::<FederatedItemGraphQlTransport<GraphQlRequest>, ErrorCollect.StandardError>ok)
-                .orElse(Result.err(new ErrorCollect.StandardError("Failed")))
-                .map(e -> e, () -> new ErrorCollect.StandardError("No FederatedItemGraphQlTransport found for " + request));
+                .map(Result::<FederatedItemGraphQlTransport<GraphQlRequest>, SingleError.StandardError>ok)
+                .orElse(Result.err(new SingleError.StandardError("Failed")))
+                .map(e -> e, () -> new SingleError.StandardError("No FederatedItemGraphQlTransport found for " + request));
     }
 
     private void registerGraphQlTransport(GraphQlRegistration federatedGraphQlTransport,

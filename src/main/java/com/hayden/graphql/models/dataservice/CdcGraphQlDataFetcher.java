@@ -86,7 +86,7 @@ public abstract class CdcGraphQlDataFetcher<T, U, E> extends RemoteDataFederatio
                     .flatMap(t -> {
                         var found = this.from(t);
                         if (found.isOk())
-                            return Mono.just(found.get());
+                            return found.one().toResultItem().firstMono();
 
                         return Mono.empty();
                     });

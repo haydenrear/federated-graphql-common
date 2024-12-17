@@ -32,7 +32,7 @@ public abstract class RemoteDataFederation<T> extends RemoteDataFetcherImpl<T>{
                      FederatedGraphQlClientBuilderHolder.FederatedGraphQlClient.FederatedGraphQlRequestArgs federatedGraphQlClient) {
         var executed = this.execute(environment);
         if (executed.isOk())
-            return Mono.just(executed.get());
+            return executed.one().toResultItem().firstMono();
 
         return Mono.empty();
     }
