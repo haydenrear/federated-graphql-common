@@ -1,3 +1,5 @@
+import org.apache.commons.lang3.JavaVersion
+
 plugins {
     id("com.hayden.test-jar")
     id("com.hayden.dgs-graphql")
@@ -11,10 +13,6 @@ tasks.register("prepareKotlinBuildScriptModel")
 
 dependencies {
     api(project(":utilitymodule"))
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_21
 }
 
 tasks.generateJava {
