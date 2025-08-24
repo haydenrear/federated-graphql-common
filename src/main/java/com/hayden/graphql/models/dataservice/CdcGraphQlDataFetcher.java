@@ -56,7 +56,7 @@ import java.util.Collection;
  *    once nodes exceed a certain value in cluster split a new cluster with a mirror.
  *
  *    So this will probably happen locally, it registers and acks a type of split. One of the nodes notices in it's calculation
- *    time for split, then sends split message in it's local, then wait for ack, then ack from quorum then onboards the split,
+ *    time for split, then sends split getMessage in it's local, then wait for ack, then ack from quorum then onboards the split,
  *    so the split happens from a node in the pool, another service gets demoted, a service waiting, to keep in balance, according
  *    to the equation. For example you have a limited number of nodes and you have the optimizer take a node away, so it calculates
  *    it could use a node, then the solver decides where the node comes from the other for the self-organization... like a company saying

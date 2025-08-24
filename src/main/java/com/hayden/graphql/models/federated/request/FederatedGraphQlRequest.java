@@ -21,7 +21,7 @@ import java.util.Optional;
  * TODO: when compiling the DataFetcher, the dependencies need to be asserted. A dependency graph therefore needs to be referenced and maintained.
  *  When a request fails, the service is removed from memory. Should the compiled files be deleted? What is the limit on files to be added? When
  *  no GraphQl service instance is referenced for a particular MimeType, a particular schema, when the query fires it will fail and be removed, but
- *  all dependencies that are not up or were removed should be returned in the error message.
+ *  all dependencies that are not up or were removed should be returned in the error getMessage.
  * @param delegators
  */
 public record FederatedGraphQlRequest(Map<FederatedGraphQlServiceFetcherItemId.FederatedGraphQlServiceFetcherId, FederatedClientGraphQlRequestItem> delegators)

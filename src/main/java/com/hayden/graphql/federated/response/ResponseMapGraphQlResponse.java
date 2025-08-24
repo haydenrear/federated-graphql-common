@@ -147,7 +147,7 @@ public class ResponseMapGraphQlResponse extends AbstractGraphQlResponse {
         @Override
         @Nullable
         public String getMessage() {
-            return (String) errorMap.get("message");
+            return (String) errorMap.get("getMessage");
         }
 
         @Override
