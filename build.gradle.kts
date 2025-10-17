@@ -1,3 +1,4 @@
+
 plugins {
     id("com.hayden.test-jar")
     id("com.hayden.dgs-graphql")
