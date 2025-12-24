@@ -1,7 +1,7 @@
 
 plugins {
     id("com.hayden.test-jar")
-    id("com.hayden.dgs-graphql")
+    id("com.hayden.graphql")
     id("com.hayden.no-main-class")
 }
 
@@ -13,10 +13,3 @@ tasks.register("prepareKotlinBuildScriptModel")
 dependencies {
     api(project(":utilitymodule"))
 }
-
-tasks.generateJava {
-    schemaPaths.add("${projectDir}/src/main/resources/graphql")
-    packageName = "com.hayden.gateway.codegen"
-    generateClient = true
-}
-
