@@ -1,13 +1,16 @@
 package com.hayden.graphql.federated.transport.federated_transport;
 
 import com.hayden.graphql.federated.FederatedGraphQlSourceProvider;
+import com.hayden.graphql.federated.config.DgsQueryExecutorConfig;
 import com.hayden.graphql.federated.config.FederatedGraphQlProperties;
 import com.hayden.graphql.federated.transport.fetcher_transport.FetcherGraphQlTransport;
 import com.hayden.graphql.federated.transport.source.FederatedDynamicGraphQlSource;
 import com.hayden.graphql.models.federated.request.ClientFederatedRequestItem;
 import com.hayden.graphql.models.federated.request.FederatedGraphQlRequest;
 import com.hayden.graphql.models.federated.service.FederatedGraphQlServiceFetcherItemId;
+import com.netflix.graphql.dgs.DgsQueryExecutor;
 import com.netflix.graphql.dgs.autoconfig.DgsAutoConfiguration;
+import com.netflix.graphql.dgs.internal.DefaultDgsQueryExecutor;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +20,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.MimeType;
 import reactor.test.StepVerifier;
@@ -28,11 +32,12 @@ import java.util.Map;
         FederatedDynamicGraphQlSource.class, FederatedGraphQlTransport.class,
         FederatedItemGraphQlTransport.CallDataFetchersFederatedGraphQlTransport.class,
         ApplicationEventPublisher.class, FetcherGraphQlTransport.class,
-        FederatedGraphQlSourceProvider.class
+        FederatedGraphQlSourceProvider.class, DgsQueryExecutor.class,
+        DefaultDgsQueryExecutor.class, DgsQueryExecutorConfig.class
 })
 @EnableConfigurationProperties(FederatedGraphQlProperties.class)
 @ExtendWith(SpringExtension.class)
-@ImportAutoConfiguration(DgsAutoConfiguration.class)
+@Import(DgsQueryExecutorConfig.class)
 class FederatedGraphQlTransportTest {
 
     @Autowired
