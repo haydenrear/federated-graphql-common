@@ -10,6 +10,15 @@ version = "0.0.1-SNAPSHOT"
 
 tasks.register("prepareKotlinBuildScriptModel")
 
+var utilLib = ""
+
+if (project.parent?.name?.contains("multi_agent_ide_parent") ?: false) {
+    utilLib = ":multi_agent_ide_java_parent"
+} else {
+    utilLib = ""
+}
+
+
 dependencies {
-    api(project(":utilitymodule"))
+    implementation(project("${utilLib}:utilitymodule"))
 }
